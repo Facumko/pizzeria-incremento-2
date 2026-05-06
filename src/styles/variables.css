@@ -1,0 +1,26 @@
+:root {
+  --color-primary: #c0392b;
+  --color-primary-dark: #96281b;
+  --color-secondary: #2c3e50;
+  --color-bg: #f5f5f5;
+  --color-white: #ffffff;
+  --color-border: #ddd;
+  --color-text: #333333;
+  --color-text-light: #666666;
+
+  --color-pendiente: #f39c12;
+  --color-listo: #27ae60;
+  --color-facturado: #95a5a6;
+
+  --font-main: 'Segoe UI', sans-serif;
+  --font-size-base: 16px;
+
+  --spacing-xs: 4px;
+  --spacing-sm: 8px;
+  --spacing-md: 16px;
+  --spacing-lg: 24px;
+  --spacing-xl: 32px;
+
+  --border-radius: 6px;
+  --shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
