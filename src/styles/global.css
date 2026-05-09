@@ -9,8 +9,10 @@
 body {
   font-family: var(--font-main);
   font-size: var(--font-size-base);
-  background-color: var(--color-bg);
   color: var(--color-text);
+  background-color: var(--color-bg);
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
 }
 
 a {
@@ -22,4 +24,79 @@ button {
   cursor: pointer;
   border: none;
   border-radius: var(--border-radius);
+  font-family: inherit;
+}
+
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+
+
+h1, h2, h3, h4 {
+  font-weight: 600;
+  line-height: 1.3;
+}
+
+
+input, select, textarea {
+  font-family: inherit;
+  font-size: var(--font-size-base);
+}
+
+/* Layout principal — se combina con Sidebar de Facu */
+.page-container {
+  padding: var(--space-xl);
+  max-width: 1100px;
+}
+
+.page-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--space-xl);
+}
+
+.page-title {
+  font-size: var(--font-size-2xl);
+  color: var(--color-text);
+}
+
+/* Card genérica */
+.card {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: var(--space-lg);
+  box-shadow: var(--shadow-sm);
+}
+
+/* Mensajes vacíos */
+.empty-message {
+  text-align: center;
+  color: var(--color-text-muted);
+  padding: var(--space-2xl) 0;
+  font-size: var(--font-size-lg);
+}
+
+/* Mensajes de error inline */
+.error-message {
+  color: var(--color-danger);
+  font-size: var(--font-size-sm);
+  margin-top: var(--space-xs);
+}
+
+.alert-error {
+  background: #fdf0ef;
+  border: 1px solid #f5c6c2;
+  border-radius: var(--radius-md);
+  padding: var(--space-md);
+  color: var(--color-danger-dark);
+  margin-bottom: var(--space-md);
+  font-size: var(--font-size-sm);
 }

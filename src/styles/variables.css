@@ -1,26 +1,68 @@
+/* ============================================
+   PIZZERIA — SISTEMA DE GESTIÓN
+   Variables globales — módulos de Maru
+   Sincronizar con variables.css de Facu al integrar
+   ============================================ */
+
 :root {
+  /* Colores principales */
   --color-primary: #c0392b;
-  --color-primary-dark: #96281b;
-  --color-secondary: #2c3e50;
+  --color-primary-dark: #a93226;
+  --color-primary-light: #e74c3c;
+
+  /* Fondos */
   --color-bg: #f5f5f5;
-  --color-white: #ffffff;
-  --color-border: #ddd;
-  --color-text: #333333;
-  --color-text-light: #666666;
+  --color-surface: #ffffff;
+  --color-surface-alt: #fafafa;
+  --color-border: #e0e0e0;
 
+  /* Texto */
+  --color-text: #1a1a1a;
+  --color-text-secondary: #666666;
+  --color-text-muted: #999999;
+
+  /* Estados de pedido — acordado con Facu */
   --color-pendiente: #f39c12;
+  --color-pendiente-bg: #fef9e7;
+  --color-pendiente-border: #f9ca73;
+
   --color-listo: #27ae60;
-  --color-facturado: #95a5a6;
+  --color-listo-bg: #eafaf1;
+  --color-listo-border: #82e0aa;
 
-  --font-main: 'Segoe UI', sans-serif;
-  --font-size-base: 16px;
+  --color-facturado: #7f8c8d;
+  --color-facturado-bg: #f2f3f4;
+  --color-facturado-border: #bdc3c7;
 
-  --spacing-xs: 4px;
-  --spacing-sm: 8px;
-  --spacing-md: 16px;
-  --spacing-lg: 24px;
-  --spacing-xl: 32px;
+  /* Interacción */
+  --color-focus: #2980b9;
+  --color-danger: #e74c3c;
+  --color-danger-dark: #c0392b;
 
-  --border-radius: 6px;
-  --shadow: 0 2px 8px rgba(0,0,0,0.1);
+  /* Espaciado */
+  --space-xs: 4px;
+  --space-sm: 8px;
+  --space-md: 16px;
+  --space-lg: 24px;
+  --space-xl: 32px;
+  --space-2xl: 48px;
+
+  /* Tipografía */
+  --font-main: "Segoe UI", system-ui, sans-serif;
+  --font-size-sm: 13px;
+  --font-size-base: 15px;
+  --font-size-lg: 17px;
+  --font-size-xl: 20px;
+  --font-size-2xl: 24px;
+
+  /* Bordes y sombras */
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.08);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.1);
+  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.12);
+
+  /* Transiciones */
+  --transition: 150ms ease;
 }

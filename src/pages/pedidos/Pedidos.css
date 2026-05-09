@@ -1,0 +1,242 @@
+/* ============================================================
+   Pedidos.css — Estilos para todos los módulos de Maru (INC-01)
+   ============================================================ */
+@import "../../styles/variables.css";
+@import "../../components/ui/Modal.css";
+@import "../../components/ui/Badge.css";
+
+/* ---------- Filtros ---------- */
+.filtros-bar {
+  display: flex;
+  gap: var(--space-sm);
+  margin-bottom: var(--space-lg);
+  flex-wrap: wrap;
+}
+
+.filtro-btn {
+  padding: 6px 16px;
+  border-radius: 20px;
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+  cursor: pointer;
+  transition: all var(--transition);
+}
+.filtro-btn:hover { border-color: var(--color-primary); color: var(--color-primary); }
+.filtro-btn--active {
+  background: var(--color-primary);
+  color: #fff;
+  border-color: var(--color-primary);
+}
+
+/* ---------- Lista de pedidos ---------- */
+.pedidos-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+.pedido-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+  transition: box-shadow var(--transition), border-color var(--transition);
+}
+.pedido-row:hover {
+  box-shadow: var(--shadow-md);
+  border-color: var(--color-primary);
+}
+
+.pedido-row__left {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+}
+
+.pedido-nro {
+  font-size: var(--font-size-xl);
+  font-weight: 700;
+  color: var(--color-text-muted);
+  min-width: 44px;
+}
+
+.pedido-cliente {
+  font-weight: 600;
+  font-size: var(--font-size-base);
+}
+
+.pedido-meta {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+  margin-top: 2px;
+}
+
+.pedido-row__right {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+}
+
+.pedido-total {
+  font-weight: 700;
+  font-size: var(--font-size-lg);
+  color: var(--color-primary);
+  min-width: 90px;
+  text-align: right;
+}
+
+/* ---------- Formulario ---------- */
+.form-section { }
+.form-section__title {
+  font-size: var(--font-size-lg);
+  margin-bottom: var(--space-md);
+  padding-bottom: var(--space-sm);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.form-row {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1;
+  min-width: 120px;
+}
+
+.form-row-group {
+  display: flex;
+  gap: var(--space-md);
+  flex-wrap: wrap;
+  margin-top: var(--space-md);
+}
+
+.form-label {
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  color: var(--color-text-secondary);
+}
+
+.form-optional {
+  font-weight: 400;
+  color: var(--color-text-muted);
+}
+
+.form-input {
+  padding: 8px 10px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  font-size: var(--font-size-base);
+  color: var(--color-text);
+  background: var(--color-surface);
+  transition: border-color var(--transition);
+  width: 100%;
+}
+.form-input:focus {
+  outline: none;
+  border-color: var(--color-focus);
+}
+.form-input[readonly] {
+  background: var(--color-bg);
+  color: var(--color-text-secondary);
+}
+
+/* ---------- Líneas de pedido ---------- */
+.lineas-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--space-md);
+}
+
+.linea-pedido {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+  padding: var(--space-md) 0;
+  border-bottom: 1px solid var(--color-border);
+}
+.linea-pedido:last-of-type { border-bottom: none; }
+
+.linea-pedido__campos {
+  display: flex;
+  gap: var(--space-md);
+  flex-wrap: wrap;
+  align-items: flex-end;
+}
+
+.linea-pedido__actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--space-md);
+}
+
+.linea-subtotal {
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  color: var(--color-text-secondary);
+}
+
+.pedido-total-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--space-md) 0 0;
+  margin-top: var(--space-md);
+  border-top: 2px solid var(--color-border);
+  font-size: var(--font-size-lg);
+}
+.pedido-total-bar strong {
+  color: var(--color-primary);
+  font-size: var(--font-size-xl);
+}
+
+.form-actions {
+  margin-top: var(--space-xl);
+  display: flex;
+  justify-content: flex-end;
+}
+
+/* ---------- Detalle pedido ---------- */
+.detalle-campo {
+  margin-bottom: var(--space-md);
+  font-size: var(--font-size-base);
+}
+.detalle-label {
+  font-weight: 600;
+  margin-right: var(--space-sm);
+  color: var(--color-text-secondary);
+}
+
+.detalle-tabla {
+  width: 100%;
+  border-collapse: collapse;
+  margin: var(--space-md) 0;
+  font-size: var(--font-size-sm);
+}
+.detalle-tabla th {
+  text-align: left;
+  padding: var(--space-sm) var(--space-md);
+  background: var(--color-bg);
+  border-bottom: 2px solid var(--color-border);
+  font-weight: 600;
+  color: var(--color-text-secondary);
+}
+.detalle-tabla td {
+  padding: var(--space-sm) var(--space-md);
+  border-bottom: 1px solid var(--color-border);
+}
+.detalle-tabla tfoot td {
+  padding-top: var(--space-md);
+  border-bottom: none;
+  font-size: var(--font-size-base);
+}
+
+.detalle-acciones {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--space-sm);
+  margin-top: var(--space-lg);
+}
