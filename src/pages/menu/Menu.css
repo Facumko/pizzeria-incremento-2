@@ -1,9 +1,8 @@
-/* Menu.css — Facu — INC-01
-   Usa las mismas variables CSS que Pedidos.css de Maru */
+/* Menu.css — INC-01 — estética actualizada */
 @import "../../styles/variables.css";
 @import "../../components/ui/Modal.css";
 
-/* ── Toolbar ──────────────────────────────────────────────── */
+/* ── Toolbar ── */
 .menu-toolbar {
   display: flex;
   gap: var(--space-sm);
@@ -14,37 +13,41 @@
 
 .menu-toolbar__search {
   flex: 1;
-  min-width: 160px;
-  padding: 8px 12px;
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-sm);
+  min-width: 180px;
+  padding: 9px 14px;
+  border: 1.5px solid var(--color-border);
+  border-radius: var(--radius-md);
   font-size: var(--font-size-sm);
   background: var(--color-surface);
   color: var(--color-text);
-  transition: border-color var(--transition);
+  transition: border-color var(--transition), box-shadow var(--transition);
+  font-family: var(--font-main);
 }
 .menu-toolbar__search:focus {
   outline: none;
-  border-color: var(--color-focus);
+  border-color: var(--color-green);
+  box-shadow: 0 0 0 3px rgba(26, 92, 56, 0.10);
 }
 
-/* ── Grid de pizzas ───────────────────────────────────────── */
+/* ── Grid de pizzas ── */
 .menu-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
   gap: var(--space-lg);
 }
 
-/* ── PizzaCard ────────────────────────────────────────────── */
+/* ── PizzaCard ── */
 .pizza-card {
   display: flex;
   flex-direction: column;
   gap: var(--space-sm);
-  transition: box-shadow var(--transition), border-color var(--transition);
+  transition: box-shadow var(--transition), border-color var(--transition), transform var(--transition);
+  border-left: 4px solid transparent;
 }
 .pizza-card:hover {
   box-shadow: var(--shadow-md);
-  border-color: var(--color-primary);
+  border-left-color: var(--color-primary);
+  transform: translateY(-2px);
 }
 
 .pizza-card__header {
@@ -56,8 +59,9 @@
 
 .pizza-card__nombre {
   font-size: var(--font-size-lg);
-  font-weight: 700;
+  font-weight: 800;
   color: var(--color-text);
+  letter-spacing: -0.3px;
 }
 
 .pizza-card__acciones {
@@ -69,7 +73,7 @@
 .pizza-card__ingredientes {
   font-size: var(--font-size-sm);
   color: var(--color-text-secondary);
-  line-height: 1.5;
+  line-height: 1.55;
 }
 
 .pizza-card__tipos {
@@ -80,39 +84,43 @@
 
 .pizza-card__tipo-tag {
   font-size: 11px;
-  padding: 2px 8px;
-  background: var(--color-bg);
+  padding: 3px 9px;
+  background: var(--color-surface-alt);
   border: 1px solid var(--color-border);
   border-radius: 20px;
   color: var(--color-text-secondary);
   text-transform: capitalize;
+  font-weight: 600;
 }
 
 .pizza-card__precios {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 5px;
   margin-top: var(--space-xs);
   padding-top: var(--space-sm);
-  border-top: 1px solid var(--color-border);
+  border-top: 1.5px solid var(--color-border);
 }
 
 .pizza-card__precio-row {
   display: flex;
   justify-content: space-between;
+  align-items: center;
   font-size: var(--font-size-sm);
 }
 
 .pizza-card__precio-label {
   color: var(--color-text-muted);
+  font-weight: 500;
 }
 
 .pizza-card__precio-valor {
-  font-weight: 600;
+  font-weight: 800;
   color: var(--color-primary);
+  font-size: var(--font-size-base);
 }
 
-/* ── Formulario de pizza ─────────────────────────────────── */
+/* ── Formulario de pizza ── */
 .pizza-form {
   max-width: 640px;
 }
@@ -122,18 +130,14 @@
   padding-bottom: var(--space-lg);
   border-bottom: 1px solid var(--color-border);
 }
-
-.pizza-form__section:last-of-type {
-  border-bottom: none;
-}
+.pizza-form__section:last-of-type { border-bottom: none; }
 
 .pizza-form__section-title {
-  font-size: var(--font-size-base);
-  font-weight: 600;
+  font-size: 11px;
+  font-weight: 700;
   color: var(--color-text-secondary);
   text-transform: uppercase;
-  letter-spacing: 0.5px;
-  font-size: 12px;
+  letter-spacing: 0.8px;
   margin-bottom: var(--space-md);
 }
 
@@ -145,30 +149,31 @@
 }
 
 .pizza-form__label {
-  font-size: var(--font-size-sm);
-  font-weight: 600;
+  font-size: 12px;
+  font-weight: 700;
   color: var(--color-text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
 }
 
 .pizza-form__input {
   padding: 9px 12px;
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-sm);
+  border: 1.5px solid var(--color-border);
+  border-radius: var(--radius-md);
   font-size: var(--font-size-base);
   color: var(--color-text);
   background: var(--color-surface);
-  transition: border-color var(--transition);
+  transition: border-color var(--transition), box-shadow var(--transition);
   width: 100%;
+  font-family: var(--font-main);
 }
 .pizza-form__input:focus {
   outline: none;
-  border-color: var(--color-focus);
+  border-color: var(--color-green);
+  box-shadow: 0 0 0 3px rgba(26, 92, 56, 0.10);
 }
-.pizza-form__input--error {
-  border-color: var(--color-danger);
-}
+.pizza-form__input--error { border-color: var(--color-danger); }
 
-/* Checkboxes de tipos de cocción */
 .pizza-form__tipos {
   display: flex;
   gap: var(--space-lg);
@@ -180,10 +185,11 @@
   align-items: center;
   gap: var(--space-xs);
   font-size: var(--font-size-sm);
+  font-weight: 600;
   cursor: pointer;
   text-transform: capitalize;
+  color: var(--color-text-secondary);
 }
-
 .pizza-form__tipo-check input[type="checkbox"] {
   width: 16px;
   height: 16px;
@@ -191,7 +197,6 @@
   cursor: pointer;
 }
 
-/* Filas de precios por tamaño */
 .pizza-form__precios {
   display: flex;
   flex-direction: column;
@@ -207,21 +212,23 @@
 .pizza-form__precio-label {
   font-size: var(--font-size-sm);
   color: var(--color-text-secondary);
-  min-width: 90px;
-  font-weight: 500;
+  min-width: 100px;
+  font-weight: 600;
 }
 
 .pizza-form__precio-input {
-  padding: 7px 10px;
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-sm);
+  padding: 8px 12px;
+  border: 1.5px solid var(--color-border);
+  border-radius: var(--radius-md);
   font-size: var(--font-size-sm);
-  width: 130px;
-  transition: border-color var(--transition);
+  width: 140px;
+  transition: border-color var(--transition), box-shadow var(--transition);
+  font-family: var(--font-main);
 }
 .pizza-form__precio-input:focus {
   outline: none;
-  border-color: var(--color-focus);
+  border-color: var(--color-green);
+  box-shadow: 0 0 0 3px rgba(26, 92, 56, 0.10);
 }
 
 .pizza-form__actions {

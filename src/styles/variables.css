@@ -1,68 +1,84 @@
 /* ============================================
    PIZZERIA — SISTEMA DE GESTIÓN
-   Variables globales — módulos de Maru
-   Sincronizar con variables.css de Facu al integrar
+   Variables globales — estética inspirada en imagen de referencia
+   Rojo + verde oscuro + crema. Limpio y moderno.
    ============================================ */
 
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
 :root {
-  /* Colores principales */
-  --color-primary: #c0392b;
-  --color-primary-dark: #a93226;
-  --color-primary-light: #e74c3c;
+  /* ── Colores principales ── */
+  --color-primary:        #c0392b;
+  --color-primary-dark:   #9b2d23;
+  --color-primary-light:  #e74c3c;
+  --color-primary-subtle: #fdf0ef;
 
-  /* Fondos */
-  --color-bg: #f5f5f5;
-  --color-surface: #ffffff;
-  --color-surface-alt: #fafafa;
-  --color-border: #e0e0e0;
+  /* ── Verde — acento sidebar/cocina ── */
+  --color-green:          #1a5c38;
+  --color-green-dark:     #134529;
+  --color-green-light:    #27ae60;
 
-  /* Texto */
-  --color-text: #1a1a1a;
-  --color-text-secondary: #666666;
-  --color-text-muted: #999999;
+  /* ── Fondos ── */
+  --color-bg:             #fdf8f3;
+  --color-surface:        #ffffff;
+  --color-surface-alt:    #faf5ef;
+  --color-border:         #e8ddd4;
+  --color-border-strong:  #c9b9ad;
 
-  /* Estados de pedido — acordado con Facu */
-  --color-pendiente: #f39c12;
-  --color-pendiente-bg: #fef9e7;
-  --color-pendiente-border: #f9ca73;
+  /* ── Sidebar ── */
+  --color-bg-sidebar:     #1a5c38;
+  --sidebar-width:        230px;
 
-  --color-listo: #27ae60;
-  --color-listo-bg: #eafaf1;
-  --color-listo-border: #82e0aa;
+  /* ── Texto ── */
+  --color-text:           #1c1008;
+  --color-text-secondary: #5c4a3a;
+  --color-text-muted:     #9c8878;
 
-  --color-facturado: #7f8c8d;
-  --color-facturado-bg: #f2f3f4;
-  --color-facturado-border: #bdc3c7;
+  /* ── Estados de pedido ── */
+  --color-pendiente:        #d68910;
+  --color-pendiente-bg:     #fef9e7;
+  --color-pendiente-border: #f5cba7;
 
-  /* Interacción */
-  --color-focus: #2980b9;
-  --color-danger: #e74c3c;
-  --color-danger-dark: #c0392b;
+  --color-listo:            #1a7a48;
+  --color-listo-bg:         #eafaf1;
+  --color-listo-border:     #a9dfbf;
 
-  /* Espaciado */
-  --space-xs: 4px;
-  --space-sm: 8px;
-  --space-md: 16px;
-  --space-lg: 24px;
-  --space-xl: 32px;
+  --color-facturado:        #6d6559;
+  --color-facturado-bg:     #f5f0eb;
+  --color-facturado-border: #c9b9ad;
+
+  /* ── Interacción ── */
+  --color-focus:        #1a5c38;
+  --color-danger:       #e74c3c;
+  --color-danger-dark:  #c0392b;
+
+  /* ── Espaciado ── */
+  --space-xs:  4px;
+  --space-sm:  8px;
+  --space-md:  16px;
+  --space-lg:  24px;
+  --space-xl:  32px;
   --space-2xl: 48px;
 
-  /* Tipografía */
-  --font-main: "Segoe UI", system-ui, sans-serif;
-  --font-size-sm: 13px;
+  /* ── Tipografía ── */
+  --font-main:      'Inter', 'Segoe UI', system-ui, sans-serif;
+  --font-size-sm:   13px;
   --font-size-base: 15px;
-  --font-size-lg: 17px;
-  --font-size-xl: 20px;
-  --font-size-2xl: 24px;
+  --font-size-lg:   17px;
+  --font-size-xl:   20px;
+  --font-size-2xl:  26px;
 
-  /* Bordes y sombras */
-  --radius-sm: 4px;
-  --radius-md: 8px;
-  --radius-lg: 12px;
-  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.08);
-  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.1);
-  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.12);
+  /* ── Bordes y sombras ── */
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+  --shadow-sm: 0 1px 3px rgba(28, 16, 8, 0.07);
+  --shadow-md: 0 4px 14px rgba(28, 16, 8, 0.10);
+  --shadow-lg: 0 8px 28px rgba(28, 16, 8, 0.13);
 
-  /* Transiciones */
-  --transition: 150ms ease;
+  /* ── Transiciones ── */
+  --transition: 160ms ease;
+
+  /* ── Alias para global.css ── */
+  --border-radius: var(--radius-md);
 }

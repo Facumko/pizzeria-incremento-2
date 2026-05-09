@@ -1,11 +1,11 @@
 /* ============================================================
-   Pedidos.css — Estilos para todos los módulos de Maru (INC-01)
+   Pedidos.css — INC-01 — estética actualizada
    ============================================================ */
 @import "../../styles/variables.css";
 @import "../../components/ui/Modal.css";
 @import "../../components/ui/Badge.css";
 
-/* ---------- Filtros ---------- */
+/* ── Filtros ── */
 .filtros-bar {
   display: flex;
   gap: var(--space-sm);
@@ -14,28 +14,34 @@
 }
 
 .filtro-btn {
-  padding: 6px 16px;
+  padding: 7px 18px;
   border-radius: 20px;
-  border: 1px solid var(--color-border);
+  border: 1.5px solid var(--color-border);
   background: var(--color-surface);
   color: var(--color-text-secondary);
   font-size: var(--font-size-sm);
-  font-weight: 500;
+  font-weight: 600;
   cursor: pointer;
   transition: all var(--transition);
+  font-family: var(--font-main);
 }
-.filtro-btn:hover { border-color: var(--color-primary); color: var(--color-primary); }
+.filtro-btn:hover {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+  background: var(--color-primary-subtle);
+}
 .filtro-btn--active {
   background: var(--color-primary);
   color: #fff;
   border-color: var(--color-primary);
+  box-shadow: 0 2px 6px rgba(192,57,43,0.25);
 }
 
-/* ---------- Lista de pedidos ---------- */
+/* ── Lista de pedidos ── */
 .pedidos-list {
   display: flex;
   flex-direction: column;
-  gap: var(--space-sm);
+  gap: 10px;
 }
 
 .pedido-row {
@@ -43,11 +49,13 @@
   align-items: center;
   justify-content: space-between;
   cursor: pointer;
-  transition: box-shadow var(--transition), border-color var(--transition);
+  transition: box-shadow var(--transition), border-color var(--transition), transform var(--transition);
+  border-left: 4px solid transparent;
 }
 .pedido-row:hover {
   box-shadow: var(--shadow-md);
-  border-color: var(--color-primary);
+  border-left-color: var(--color-primary);
+  transform: translateX(2px);
 }
 
 .pedido-row__left {
@@ -57,15 +65,17 @@
 }
 
 .pedido-nro {
-  font-size: var(--font-size-xl);
-  font-weight: 700;
-  color: var(--color-text-muted);
-  min-width: 44px;
+  font-size: 22px;
+  font-weight: 800;
+  color: var(--color-border-strong);
+  min-width: 48px;
+  letter-spacing: -1px;
 }
 
 .pedido-cliente {
-  font-weight: 600;
+  font-weight: 700;
   font-size: var(--font-size-base);
+  color: var(--color-text);
 }
 
 .pedido-meta {
@@ -81,26 +91,30 @@
 }
 
 .pedido-total {
-  font-weight: 700;
+  font-weight: 800;
   font-size: var(--font-size-lg);
   color: var(--color-primary);
-  min-width: 90px;
+  min-width: 100px;
   text-align: right;
 }
 
-/* ---------- Formulario ---------- */
-.form-section { }
+/* ── Formulario ── */
 .form-section__title {
-  font-size: var(--font-size-lg);
+  font-size: var(--font-size-base);
+  font-weight: 700;
+  color: var(--color-text-secondary);
   margin-bottom: var(--space-md);
   padding-bottom: var(--space-sm);
-  border-bottom: 1px solid var(--color-border);
+  border-bottom: 2px solid var(--color-border);
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  font-size: 12px;
 }
 
 .form-row {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 5px;
   flex: 1;
   min-width: 120px;
 }
@@ -113,36 +127,47 @@
 }
 
 .form-label {
-  font-size: var(--font-size-sm);
-  font-weight: 600;
+  font-size: 12px;
+  font-weight: 700;
   color: var(--color-text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
 }
 
 .form-optional {
   font-weight: 400;
   color: var(--color-text-muted);
+  text-transform: none;
+  letter-spacing: 0;
 }
 
 .form-input {
-  padding: 8px 10px;
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-sm);
+  padding: 9px 12px;
+  border: 1.5px solid var(--color-border);
+  border-radius: var(--radius-md);
   font-size: var(--font-size-base);
   color: var(--color-text);
   background: var(--color-surface);
-  transition: border-color var(--transition);
+  transition: border-color var(--transition), box-shadow var(--transition);
   width: 100%;
 }
 .form-input:focus {
   outline: none;
-  border-color: var(--color-focus);
+  border-color: var(--color-green);
+  box-shadow: 0 0 0 3px rgba(26, 92, 56, 0.10);
 }
 .form-input[readonly] {
   background: var(--color-bg);
   color: var(--color-text-secondary);
+  cursor: default;
+}
+.form-input:disabled {
+  background: var(--color-bg);
+  color: var(--color-text-muted);
+  cursor: not-allowed;
 }
 
-/* ---------- Líneas de pedido ---------- */
+/* ── Líneas de pedido ── */
 .lineas-header {
   display: flex;
   align-items: center;
@@ -175,7 +200,7 @@
 
 .linea-subtotal {
   font-size: var(--font-size-sm);
-  font-weight: 600;
+  font-weight: 700;
   color: var(--color-text-secondary);
 }
 
@@ -186,11 +211,14 @@
   padding: var(--space-md) 0 0;
   margin-top: var(--space-md);
   border-top: 2px solid var(--color-border);
-  font-size: var(--font-size-lg);
+  font-size: var(--font-size-base);
+  font-weight: 600;
+  color: var(--color-text-secondary);
 }
 .pedido-total-bar strong {
   color: var(--color-primary);
   font-size: var(--font-size-xl);
+  font-weight: 800;
 }
 
 .form-actions {
@@ -199,15 +227,18 @@
   justify-content: flex-end;
 }
 
-/* ---------- Detalle pedido ---------- */
+/* ── Detalle pedido ── */
 .detalle-campo {
   margin-bottom: var(--space-md);
   font-size: var(--font-size-base);
 }
 .detalle-label {
-  font-weight: 600;
+  font-weight: 700;
   margin-right: var(--space-sm);
   color: var(--color-text-secondary);
+  text-transform: uppercase;
+  font-size: 12px;
+  letter-spacing: 0.4px;
 }
 
 .detalle-tabla {
@@ -218,15 +249,22 @@
 }
 .detalle-tabla th {
   text-align: left;
-  padding: var(--space-sm) var(--space-md);
+  padding: 10px var(--space-md);
   background: var(--color-bg);
   border-bottom: 2px solid var(--color-border);
-  font-weight: 600;
+  font-weight: 700;
   color: var(--color-text-secondary);
+  text-transform: uppercase;
+  font-size: 11px;
+  letter-spacing: 0.5px;
 }
 .detalle-tabla td {
-  padding: var(--space-sm) var(--space-md);
+  padding: 10px var(--space-md);
   border-bottom: 1px solid var(--color-border);
+  color: var(--color-text);
+}
+.detalle-tabla tbody tr:hover {
+  background: var(--color-surface-alt);
 }
 .detalle-tabla tfoot td {
   padding-top: var(--space-md);
@@ -239,4 +277,6 @@
   justify-content: flex-end;
   gap: var(--space-sm);
   margin-top: var(--space-lg);
+  padding-top: var(--space-lg);
+  border-top: 1px solid var(--color-border);
 }
