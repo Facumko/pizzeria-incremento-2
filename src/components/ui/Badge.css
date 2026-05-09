@@ -1,0 +1,27 @@
+.badge {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+  white-space: nowrap;
+}
+
+.badge--pendiente {
+  background: var(--color-pendiente-bg);
+  color: var(--color-pendiente);
+  border: 1px solid var(--color-pendiente-border);
+}
+
+.badge--listo {
+  background: var(--color-listo-bg);
+  color: var(--color-listo);
+  border: 1px solid var(--color-listo-border);
+}
+
+.badge--facturado {
+  background: var(--color-facturado-bg);
+  color: var(--color-facturado);
+  border: 1px solid var(--color-facturado-border);
+}

@@ -1,0 +1,144 @@
+/* ============================================================
+   Cocina.css — Vista diseñada para pantalla grande en cocina
+   ============================================================ */
+@import "../../styles/variables.css";
+@import "../../components/ui/Modal.css";
+
+.cocina-container {
+  padding: var(--space-xl);
+  min-height: 100vh;
+  background: #1a1a1a;
+  color: #fff;
+}
+
+.cocina-header {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-md);
+  margin-bottom: var(--space-xl);
+}
+
+.cocina-title {
+  font-size: 32px;
+  font-weight: 700;
+  color: #fff;
+}
+
+.cocina-subtitle {
+  font-size: var(--font-size-base);
+  color: #aaa;
+}
+
+.cocina-feedback {
+  background: #27ae60;
+  color: #fff;
+  padding: var(--space-sm) var(--space-md);
+  border-radius: var(--radius-md);
+  margin-bottom: var(--space-lg);
+  font-weight: 600;
+}
+
+.cocina-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-2xl) 0;
+  color: #555;
+  gap: var(--space-md);
+}
+
+.cocina-empty__icon {
+  font-size: 64px;
+  color: #27ae60;
+}
+
+.cocina-empty p {
+  font-size: var(--font-size-xl);
+}
+
+/* Grid de tarjetas */
+.cocina-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: var(--space-lg);
+}
+
+.cocina-card {
+  background: #2a2a2a;
+  border: 2px solid #3a3a3a;
+  border-radius: var(--radius-lg);
+  padding: var(--space-lg);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+  transition: border-color var(--transition);
+}
+.cocina-card:hover { border-color: var(--color-primary); }
+
+.cocina-card__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--space-xs);
+}
+
+.cocina-card__nro {
+  font-size: var(--font-size-xl);
+  font-weight: 700;
+  color: #fff;
+}
+
+.cocina-card__hora {
+  font-size: var(--font-size-sm);
+  color: var(--color-pendiente);
+  font-weight: 600;
+}
+
+.cocina-card__cliente {
+  font-size: var(--font-size-base);
+  color: #ccc;
+}
+
+.cocina-card__demora {
+  font-size: var(--font-size-sm);
+  color: #888;
+}
+
+.cocina-card__lineas {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: var(--space-sm) 0;
+  padding: var(--space-sm) 0;
+  border-top: 1px solid #3a3a3a;
+  border-bottom: 1px solid #3a3a3a;
+}
+
+.cocina-card__linea {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  font-size: var(--font-size-base);
+}
+
+.cocina-card__cant {
+  font-size: var(--font-size-lg);
+  font-weight: 700;
+  color: var(--color-primary-light);
+  min-width: 28px;
+}
+
+.cocina-card__desc {
+  color: #ddd;
+  text-transform: capitalize;
+}
+
+.cocina-card__btn {
+  width: 100%;
+  margin-top: var(--space-sm);
+  padding: 12px;
+  font-size: var(--font-size-base);
+  justify-content: center;
+}
