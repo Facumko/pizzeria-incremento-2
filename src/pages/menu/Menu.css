@@ -1,0 +1,232 @@
+/* Menu.css — Facu — INC-01
+   Usa las mismas variables CSS que Pedidos.css de Maru */
+@import "../../styles/variables.css";
+@import "../../components/ui/Modal.css";
+
+/* ── Toolbar ──────────────────────────────────────────────── */
+.menu-toolbar {
+  display: flex;
+  gap: var(--space-sm);
+  margin-bottom: var(--space-lg);
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.menu-toolbar__search {
+  flex: 1;
+  min-width: 160px;
+  padding: 8px 12px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  font-size: var(--font-size-sm);
+  background: var(--color-surface);
+  color: var(--color-text);
+  transition: border-color var(--transition);
+}
+.menu-toolbar__search:focus {
+  outline: none;
+  border-color: var(--color-focus);
+}
+
+/* ── Grid de pizzas ───────────────────────────────────────── */
+.menu-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: var(--space-lg);
+}
+
+/* ── PizzaCard ────────────────────────────────────────────── */
+.pizza-card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+  transition: box-shadow var(--transition), border-color var(--transition);
+}
+.pizza-card:hover {
+  box-shadow: var(--shadow-md);
+  border-color: var(--color-primary);
+}
+
+.pizza-card__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-sm);
+}
+
+.pizza-card__nombre {
+  font-size: var(--font-size-lg);
+  font-weight: 700;
+  color: var(--color-text);
+}
+
+.pizza-card__acciones {
+  display: flex;
+  gap: var(--space-xs);
+  flex-shrink: 0;
+}
+
+.pizza-card__ingredientes {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  line-height: 1.5;
+}
+
+.pizza-card__tipos {
+  display: flex;
+  gap: var(--space-xs);
+  flex-wrap: wrap;
+}
+
+.pizza-card__tipo-tag {
+  font-size: 11px;
+  padding: 2px 8px;
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+  border-radius: 20px;
+  color: var(--color-text-secondary);
+  text-transform: capitalize;
+}
+
+.pizza-card__precios {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-top: var(--space-xs);
+  padding-top: var(--space-sm);
+  border-top: 1px solid var(--color-border);
+}
+
+.pizza-card__precio-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: var(--font-size-sm);
+}
+
+.pizza-card__precio-label {
+  color: var(--color-text-muted);
+}
+
+.pizza-card__precio-valor {
+  font-weight: 600;
+  color: var(--color-primary);
+}
+
+/* ── Formulario de pizza ─────────────────────────────────── */
+.pizza-form {
+  max-width: 640px;
+}
+
+.pizza-form__section {
+  margin-bottom: var(--space-lg);
+  padding-bottom: var(--space-lg);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.pizza-form__section:last-of-type {
+  border-bottom: none;
+}
+
+.pizza-form__section-title {
+  font-size: var(--font-size-base);
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-size: 12px;
+  margin-bottom: var(--space-md);
+}
+
+.pizza-form__row {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: var(--space-md);
+}
+
+.pizza-form__label {
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  color: var(--color-text-secondary);
+}
+
+.pizza-form__input {
+  padding: 9px 12px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  font-size: var(--font-size-base);
+  color: var(--color-text);
+  background: var(--color-surface);
+  transition: border-color var(--transition);
+  width: 100%;
+}
+.pizza-form__input:focus {
+  outline: none;
+  border-color: var(--color-focus);
+}
+.pizza-form__input--error {
+  border-color: var(--color-danger);
+}
+
+/* Checkboxes de tipos de cocción */
+.pizza-form__tipos {
+  display: flex;
+  gap: var(--space-lg);
+  flex-wrap: wrap;
+}
+
+.pizza-form__tipo-check {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+  font-size: var(--font-size-sm);
+  cursor: pointer;
+  text-transform: capitalize;
+}
+
+.pizza-form__tipo-check input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  accent-color: var(--color-primary);
+  cursor: pointer;
+}
+
+/* Filas de precios por tamaño */
+.pizza-form__precios {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+.pizza-form__precio-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+}
+
+.pizza-form__precio-label {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  min-width: 90px;
+  font-weight: 500;
+}
+
+.pizza-form__precio-input {
+  padding: 7px 10px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  font-size: var(--font-size-sm);
+  width: 130px;
+  transition: border-color var(--transition);
+}
+.pizza-form__precio-input:focus {
+  outline: none;
+  border-color: var(--color-focus);
+}
+
+.pizza-form__actions {
+  display: flex;
+  gap: var(--space-sm);
+  justify-content: flex-end;
+  margin-top: var(--space-xl);
+}

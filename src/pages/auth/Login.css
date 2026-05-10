@@ -1,0 +1,112 @@
+/* Login.css — Facu — INC-01 */
+
+.login-page {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #1a252f 0%, #2c3e50 60%, #3d566e 100%);
+  padding: 16px;
+}
+
+.login-card {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+  width: 100%;
+  max-width: 400px;
+  overflow: hidden;
+}
+
+.login-card__header {
+  background: var(--color-primary, #c0392b);
+  padding: 32px 32px 24px;
+  text-align: center;
+}
+
+.login-card__logo {
+  font-size: 48px;
+  margin-bottom: 8px;
+}
+
+.login-card__title {
+  font-size: 22px;
+  font-weight: 700;
+  color: #fff;
+  margin-bottom: 4px;
+}
+
+.login-card__subtitle {
+  font-size: 13px;
+  color: rgba(255,255,255,0.75);
+}
+
+.login-card__body {
+  padding: 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.login-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.login-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-text-secondary, #666);
+}
+
+.login-input {
+  padding: 10px 12px;
+  border: 1px solid var(--color-border, #e0e0e0);
+  border-radius: var(--radius-sm, 4px);
+  font-size: 15px;
+  color: var(--color-text, #1a1a1a);
+  transition: border-color 150ms ease;
+  width: 100%;
+}
+.login-input:focus {
+  outline: none;
+  border-color: var(--color-primary, #c0392b);
+  box-shadow: 0 0 0 3px rgba(192,57,43,0.1);
+}
+
+.login-error {
+  background: #fdf0ef;
+  border: 1px solid #f5c6c2;
+  border-radius: var(--radius-sm, 4px);
+  padding: 10px 12px;
+  color: var(--color-danger-dark, #c0392b);
+  font-size: 13px;
+}
+
+.login-btn {
+  padding: 12px;
+  background: var(--color-primary, #c0392b);
+  color: #fff;
+  border: none;
+  border-radius: var(--radius-sm, 4px);
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 150ms ease;
+  margin-top: 4px;
+}
+.login-btn:hover:not(:disabled) {
+  background: var(--color-primary-dark, #a93226);
+}
+.login-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.login-hint {
+  text-align: center;
+  font-size: 12px;
+  color: var(--color-text-muted, #999);
+  padding-bottom: 8px;
+}
