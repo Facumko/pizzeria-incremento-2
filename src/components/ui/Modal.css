@@ -4,7 +4,7 @@
 .modal-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.45);
+  background: rgba(28, 16, 8, 0.50);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -18,11 +18,12 @@
   box-shadow: var(--shadow-lg);
   width: 100%;
   max-width: 460px;
-  animation: modalIn 150ms ease;
+  animation: modalIn 160ms ease;
+  border: 1px solid var(--color-border);
 }
 
 @keyframes modalIn {
-  from { opacity: 0; transform: scale(0.96) translateY(-8px); }
+  from { opacity: 0; transform: scale(0.97) translateY(-6px); }
   to   { opacity: 1; transform: scale(1) translateY(0); }
 }
 
@@ -36,7 +37,8 @@
 
 .modal__title {
   font-size: var(--font-size-lg);
-  font-weight: 600;
+  font-weight: 700;
+  color: var(--color-text);
 }
 
 .modal__close {
@@ -47,13 +49,15 @@
   padding: 4px 8px;
   border-radius: var(--radius-sm);
   transition: background var(--transition);
+  cursor: pointer;
 }
-.modal__close:hover { background: var(--color-bg); }
+.modal__close:hover { background: var(--color-bg); color: var(--color-text); }
 
 .modal__body {
   padding: var(--space-lg);
   color: var(--color-text-secondary);
-  line-height: 1.6;
+  line-height: 1.65;
+  font-size: var(--font-size-base);
 }
 
 .modal__footer {
@@ -62,57 +66,79 @@
   gap: var(--space-sm);
   padding: var(--space-md) var(--space-lg);
   border-top: 1px solid var(--color-border);
+  background: var(--color-surface-alt);
+  border-radius: 0 0 var(--radius-lg) var(--radius-lg);
 }
 
 /* ============================================================
-   Buttons — usados en toda la app de Maru
+   Buttons
    ============================================================ */
 .btn {
   display: inline-flex;
   align-items: center;
   gap: var(--space-xs);
-  padding: 8px 18px;
+  padding: 9px 20px;
   border-radius: var(--radius-md);
   font-size: var(--font-size-sm);
   font-weight: 600;
   border: none;
   cursor: pointer;
-  transition: background var(--transition), opacity var(--transition);
+  transition: background var(--transition), box-shadow var(--transition), opacity var(--transition);
   white-space: nowrap;
+  letter-spacing: 0.1px;
+  font-family: var(--font-main);
 }
 
 .btn:disabled {
-  opacity: 0.5;
+  opacity: 0.50;
   cursor: not-allowed;
 }
 
 .btn--primary {
   background: var(--color-primary);
   color: #fff;
+  box-shadow: 0 2px 6px rgba(192, 57, 43, 0.30);
 }
-.btn--primary:hover:not(:disabled) { background: var(--color-primary-dark); }
+.btn--primary:hover:not(:disabled) {
+  background: var(--color-primary-dark);
+  box-shadow: 0 3px 10px rgba(192, 57, 43, 0.35);
+}
 
 .btn--secondary {
   background: var(--color-surface);
-  color: var(--color-text);
+  color: var(--color-text-secondary);
   border: 1px solid var(--color-border);
 }
-.btn--secondary:hover:not(:disabled) { background: var(--color-bg); }
+.btn--secondary:hover:not(:disabled) {
+  background: var(--color-surface-alt);
+  border-color: var(--color-border-strong);
+}
 
 .btn--danger {
   background: var(--color-danger);
   color: #fff;
+  box-shadow: 0 2px 6px rgba(231, 76, 60, 0.25);
 }
 .btn--danger:hover:not(:disabled) { background: var(--color-danger-dark); }
 
 .btn--ghost {
-  background: none;
+  background: transparent;
   color: var(--color-primary);
-  border: 1px solid var(--color-primary);
+  border: 1.5px solid var(--color-primary);
 }
-.btn--ghost:hover:not(:disabled) { background: #fdf0ef; }
+.btn--ghost:hover:not(:disabled) {
+  background: var(--color-primary-subtle);
+}
+
+.btn--green {
+  background: var(--color-green);
+  color: #fff;
+  box-shadow: 0 2px 6px rgba(26, 92, 56, 0.28);
+}
+.btn--green:hover:not(:disabled) { background: var(--color-green-dark); }
 
 .btn--sm {
-  padding: 5px 12px;
+  padding: 5px 13px;
   font-size: 12px;
+  border-radius: var(--radius-sm);
 }

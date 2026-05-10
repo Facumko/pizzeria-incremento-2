@@ -1,27 +1,29 @@
 .badge {
-  display: inline-block;
-  padding: 3px 10px;
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 11px;
   border-radius: 20px;
   font-size: 12px;
-  font-weight: 600;
+  font-weight: 700;
   letter-spacing: 0.3px;
   white-space: nowrap;
+  text-transform: uppercase;
 }
 
 .badge--pendiente {
   background: var(--color-pendiente-bg);
   color: var(--color-pendiente);
-  border: 1px solid var(--color-pendiente-border);
+  border: 1.5px solid var(--color-pendiente-border);
 }
 
 .badge--listo {
   background: var(--color-listo-bg);
   color: var(--color-listo);
-  border: 1px solid var(--color-listo-border);
+  border: 1.5px solid var(--color-listo-border);
 }
 
 .badge--facturado {
   background: var(--color-facturado-bg);
   color: var(--color-facturado);
-  border: 1px solid var(--color-facturado-border);
+  border: 1.5px solid var(--color-facturado-border);
 }

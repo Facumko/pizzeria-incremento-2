@@ -1,9 +1,11 @@
 @import './variables.css';
 
-* {
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
   margin: 0;
   padding: 0;
-  box-sizing: border-box;
 }
 
 body {
@@ -27,29 +29,17 @@ button {
   font-family: inherit;
 }
 
-
-*,
-*::before,
-*::after {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-}
-
-
-
 h1, h2, h3, h4 {
-  font-weight: 600;
-  line-height: 1.3;
+  font-weight: 700;
+  line-height: 1.25;
 }
-
 
 input, select, textarea {
   font-family: inherit;
   font-size: var(--font-size-base);
 }
 
-/* Layout principal — se combina con Sidebar de Facu */
+/* ── Layout principal ── */
 .page-container {
   padding: var(--space-xl);
   max-width: 1100px;
@@ -64,10 +54,12 @@ input, select, textarea {
 
 .page-title {
   font-size: var(--font-size-2xl);
+  font-weight: 800;
   color: var(--color-text);
+  letter-spacing: -0.5px;
 }
 
-/* Card genérica */
+/* ── Card genérica ── */
 .card {
   background: var(--color-surface);
   border: 1px solid var(--color-border);
@@ -76,7 +68,7 @@ input, select, textarea {
   box-shadow: var(--shadow-sm);
 }
 
-/* Mensajes vacíos */
+/* ── Mensajes vacíos ── */
 .empty-message {
   text-align: center;
   color: var(--color-text-muted);
@@ -84,7 +76,7 @@ input, select, textarea {
   font-size: var(--font-size-lg);
 }
 
-/* Mensajes de error inline */
+/* ── Alertas ── */
 .error-message {
   color: var(--color-danger);
   font-size: var(--font-size-sm);
@@ -92,7 +84,7 @@ input, select, textarea {
 }
 
 .alert-error {
-  background: #fdf0ef;
+  background: var(--color-primary-subtle);
   border: 1px solid #f5c6c2;
   border-radius: var(--radius-md);
   padding: var(--space-md);
