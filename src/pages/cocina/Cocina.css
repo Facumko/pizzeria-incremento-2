@@ -10,7 +10,6 @@
   min-height: 100vh;
   background: var(--color-green-dark);
   color: #fff;
-  /* Grilla decorativa sutil */
   background-image:
     linear-gradient(var(--color-green-dark) 0%, var(--color-green-dark) 100%),
     linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
@@ -87,6 +86,9 @@
   display: flex;
   flex-direction: column;
   gap: var(--space-sm);
+  /* Evita que el contenido interno rompa el ancho de la card */
+  min-width: 0;
+  overflow: hidden;
   transition: border-color var(--transition), background var(--transition), transform var(--transition);
   backdrop-filter: blur(4px);
 }
@@ -101,7 +103,8 @@
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  margin-bottom: var(--space-xs);
+  gap: var(--space-sm);
+  min-width: 0;
 }
 
 .cocina-card__nro {
@@ -109,6 +112,8 @@
   font-weight: 800;
   color: #fff;
   letter-spacing: -1px;
+  /* No se encoge ni crece para que el badge no lo aplaste */
+  flex-shrink: 0;
 }
 
 .cocina-card__hora {
@@ -119,17 +124,30 @@
   padding: 3px 10px;
   border-radius: 20px;
   border: 1px solid var(--color-pendiente-border);
+  /* Si la hora es larga, que haga wrap en vez de romper el layout */
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 160px;
 }
 
 .cocina-card__cliente {
   font-size: var(--font-size-base);
   color: rgba(255,255,255,0.80);
   font-weight: 600;
+  /* Truncar nombre largo con ellipsis */
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
 }
 
 .cocina-card__demora {
   font-size: var(--font-size-sm);
   color: rgba(255,255,255,0.45);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .cocina-card__lineas {
@@ -141,20 +159,25 @@
   padding: var(--space-md) 0;
   border-top: 1px solid rgba(255,255,255,0.10);
   border-bottom: 1px solid rgba(255,255,255,0.10);
+  /* La lista no puede romper el contenedor */
+  min-width: 0;
 }
 
 .cocina-card__linea {
   display: flex;
-  align-items: center;
+  align-items: baseline;
   gap: var(--space-sm);
   font-size: var(--font-size-base);
+  min-width: 0;
 }
 
 .cocina-card__cant {
   font-size: var(--font-size-xl);
   font-weight: 800;
   color: var(--color-primary-light);
-  min-width: 32px;
+  /* Ancho fijo para que la descripción arranque siempre en el mismo punto */
+  min-width: 36px;
+  flex-shrink: 0;
   letter-spacing: -1px;
 }
 
@@ -162,6 +185,11 @@
   color: rgba(255,255,255,0.85);
   text-transform: capitalize;
   font-weight: 500;
+  /* Wrap normal: si el nombre es largo, corta en múltiples líneas
+     dentro de la card en vez de desbordarse */
+  word-break: break-word;
+  overflow-wrap: break-word;
+  min-width: 0;
 }
 
 .cocina-card__btn {

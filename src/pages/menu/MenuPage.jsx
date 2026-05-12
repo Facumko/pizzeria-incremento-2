@@ -9,17 +9,18 @@ import PizzaCard from "./PizzaCard";
 import "./Menu.css";
 
 const TIPOS_FILTRO = ["Todos", "piedra", "parrilla", "molde"];
+const MAX_BUSQUEDA = 100;
 
 const MenuPage = () => {
   const navigate = useNavigate();
   const { tieneRol } = useAuth();
   const esDueno = tieneRol("Dueno");
 
-  const [pizzas, setPizzas] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [busqueda, setBusqueda] = useState("");
+  const [pizzas,     setPizzas]     = useState([]);
+  const [loading,    setLoading]    = useState(true);
+  const [busqueda,   setBusqueda]   = useState("");
   const [filtroTipo, setFiltroTipo] = useState("Todos");
-  const [feedback, setFeedback] = useState("");
+  const [feedback,   setFeedback]   = useState("");
 
   const cargar = async () => {
     setLoading(true);
@@ -87,6 +88,7 @@ const MenuPage = () => {
           placeholder="Buscar por nombre o ingrediente..."
           value={busqueda}
           onChange={(e) => setBusqueda(e.target.value)}
+          maxLength={MAX_BUSQUEDA}
         />
         <div className="filtros-bar" style={{ marginBottom: 0 }}>
           {TIPOS_FILTRO.map((t) => (

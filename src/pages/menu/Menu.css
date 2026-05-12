@@ -1,4 +1,4 @@
-/* Menu.css — INC-01 — estética actualizada */
+/* Menu.css — INC-01 */
 @import "../../styles/variables.css";
 @import "../../components/ui/Modal.css";
 
@@ -13,7 +13,8 @@
 
 .menu-toolbar__search {
   flex: 1;
-  min-width: 180px;
+  min-width: 160px;
+  max-width: 100%;
   padding: 9px 14px;
   border: 1.5px solid var(--color-border);
   border-radius: var(--radius-md);
@@ -29,11 +30,15 @@
   box-shadow: 0 0 0 3px rgba(26, 92, 56, 0.10);
 }
 
-/* ── Grid de pizzas ── */
+/* ── Grid de pizzas — adaptable ── */
 .menu-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
+  /* mínimo 260px, máximo 1fr: en pantallas chicas cae a 1 col, en grandes llena */
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
   gap: var(--space-lg);
+  /* La grid no desborda el contenedor */
+  width: 100%;
+  min-width: 0;
 }
 
 /* ── PizzaCard ── */
@@ -41,6 +46,9 @@
   display: flex;
   flex-direction: column;
   gap: var(--space-sm);
+  /* Evita que el contenido interno rompa el ancho de la columna */
+  min-width: 0;
+  overflow: hidden;
   transition: box-shadow var(--transition), border-color var(--transition), transform var(--transition);
   border-left: 4px solid transparent;
 }
@@ -55,6 +63,7 @@
   align-items: flex-start;
   justify-content: space-between;
   gap: var(--space-sm);
+  min-width: 0;
 }
 
 .pizza-card__nombre {
@@ -62,6 +71,10 @@
   font-weight: 800;
   color: var(--color-text);
   letter-spacing: -0.3px;
+  /* Wrap si el nombre es largo */
+  word-break: break-word;
+  overflow-wrap: break-word;
+  min-width: 0;
 }
 
 .pizza-card__acciones {
@@ -74,6 +87,8 @@
   font-size: var(--font-size-sm);
   color: var(--color-text-secondary);
   line-height: 1.55;
+  word-break: break-word;
+  overflow-wrap: break-word;
 }
 
 .pizza-card__tipos {
@@ -91,6 +106,7 @@
   color: var(--color-text-secondary);
   text-transform: capitalize;
   font-weight: 600;
+  white-space: nowrap;
 }
 
 .pizza-card__precios {
@@ -107,22 +123,29 @@
   justify-content: space-between;
   align-items: center;
   font-size: var(--font-size-sm);
+  gap: var(--space-sm);
+  min-width: 0;
 }
 
 .pizza-card__precio-label {
   color: var(--color-text-muted);
   font-weight: 500;
+  white-space: nowrap;
 }
 
 .pizza-card__precio-valor {
   font-weight: 800;
   color: var(--color-primary);
   font-size: var(--font-size-base);
+  white-space: nowrap;
 }
 
 /* ── Formulario de pizza ── */
 .pizza-form {
   max-width: 640px;
+  /* En pantallas chicas ocupa el ancho disponible */
+  width: 100%;
+  min-width: 0;
 }
 
 .pizza-form__section {
@@ -146,6 +169,7 @@
   flex-direction: column;
   gap: 6px;
   margin-bottom: var(--space-md);
+  min-width: 0;
 }
 
 .pizza-form__label {
@@ -166,6 +190,7 @@
   transition: border-color var(--transition), box-shadow var(--transition);
   width: 100%;
   font-family: var(--font-main);
+  min-width: 0;
 }
 .pizza-form__input:focus {
   outline: none;
@@ -207,6 +232,8 @@
   display: flex;
   align-items: center;
   gap: var(--space-md);
+  flex-wrap: wrap;
+  min-width: 0;
 }
 
 .pizza-form__precio-label {
@@ -214,6 +241,7 @@
   color: var(--color-text-secondary);
   min-width: 100px;
   font-weight: 600;
+  white-space: nowrap;
 }
 
 .pizza-form__precio-input {
@@ -222,6 +250,8 @@
   border-radius: var(--radius-md);
   font-size: var(--font-size-sm);
   width: 140px;
+  /* En pantallas chicas no desborda */
+  max-width: 100%;
   transition: border-color var(--transition), box-shadow var(--transition);
   font-family: var(--font-main);
 }
@@ -236,4 +266,29 @@
   gap: var(--space-sm);
   justify-content: flex-end;
   margin-top: var(--space-xl);
+  flex-wrap: wrap;
+}
+
+/* ── Responsive: pantallas angostas ── */
+@media (max-width: 480px) {
+  .menu-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .pizza-form__precio-row {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .pizza-form__precio-input {
+    width: 100%;
+  }
+
+  .pizza-form__actions {
+    justify-content: stretch;
+  }
+  .pizza-form__actions .btn {
+    width: 100%;
+    justify-content: center;
+  }
 }

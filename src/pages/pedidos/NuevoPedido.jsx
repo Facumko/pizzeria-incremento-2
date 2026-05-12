@@ -7,12 +7,11 @@ import { crearPedido, calcularTotal } from "../../services/pedidoService";
 import { getPizzas } from "../../services/pizzaService";
 import "./Pedidos.css";
 
-const TAMANIOS        = [8, 10, 12];
-const MAX_LINEAS      = 50;
-const MAX_CANTIDAD    = 99;
-const MAX_CLIENTE     = 50;
-const MAX_DEMORA_MIN  = 59;
-const MAX_DEMORA_HS   = 23;
+const TAMANIOS     = [8, 10, 12];
+const MAX_LINEAS   = 50;
+const MAX_CANTIDAD = 99;
+const MAX_CLIENTE  = 50;
+const MAX_DEMORA   = 999; // minutos
 
 const lineaVacia = () => ({
   _key: Date.now() + Math.random(),
@@ -25,44 +24,27 @@ const lineaVacia = () => ({
 
 const NuevoPedido = () => {
   const navigate = useNavigate();
-  const [pizzas,         setPizzas]         = useState([]);
-  const [cliente,        setCliente]        = useState("");
-  const [horaEntrega,    setHoraEntrega]    = useState("");
-  const [demoraNum,      setDemoraNum]      = useState("");   // número
-  const [demoraUnidad,   setDemoraUnidad]   = useState("min"); // "min" | "hs"
-  const [lineas,         setLineas]         = useState([lineaVacia()]);
-  const [error,          setError]          = useState("");
-  const [saving,         setSaving]         = useState(false);
-  // errores por campo
-  const [errLineas,      setErrLineas]      = useState({});   // { _key: msg }
-  const [errDemora,      setErrDemora]      = useState("");
-  const [errHora,        setErrHora]        = useState("");
+  const [pizzas,       setPizzas]       = useState([]);
+  const [cliente,      setCliente]      = useState("");
+  const [horaEntrega,  setHoraEntrega]  = useState("");
+  const [demoraMin,    setDemoraMin]    = useState("");
+  const [lineas,       setLineas]       = useState([lineaVacia()]);
+  const [error,        setError]        = useState("");
+  const [saving,       setSaving]       = useState(false);
+  const [errLineas,    setErrLineas]    = useState({});
+  const [errDemora,    setErrDemora]    = useState("");
+  const [errHora,      setErrHora]      = useState("");
 
   useEffect(() => { getPizzas().then(setPizzas); }, []);
 
   const pizzaSeleccionada = (nombre) => pizzas.find((p) => p.nombre === nombre);
 
-  // ── Demora: máximo según unidad ──
-  const maxDemora = demoraUnidad === "min" ? MAX_DEMORA_MIN : MAX_DEMORA_HS;
-
-  const handleDemoraNum = (val) => {
-    // Solo dígitos, sin negativos
+  const handleDemoraMin = (val) => {
     const limpio = val.replace(/\D/g, "");
-    if (limpio === "") { setDemoraNum(""); setErrDemora(""); return; }
-    const n = Math.min(Number(limpio), maxDemora);
-    setDemoraNum(String(n));
+    if (limpio === "") { setDemoraMin(""); setErrDemora(""); return; }
+    const n = Math.min(Number(limpio), MAX_DEMORA);
+    setDemoraMin(String(n));
     setErrDemora(n < 1 ? "Ingresá un valor válido." : "");
-  };
-
-  const handleDemoraUnidad = (val) => {
-    setDemoraUnidad(val);
-    // Re-clampear si el número excede el nuevo máximo
-    if (demoraNum !== "") {
-      const max = val === "min" ? MAX_DEMORA_MIN : MAX_DEMORA_HS;
-      const n   = Math.min(Number(demoraNum), max);
-      setDemoraNum(String(n));
-    }
-    setErrDemora("");
   };
 
   const handleHora = (val) => {
@@ -70,7 +52,6 @@ const NuevoPedido = () => {
     setErrHora(val ? "" : "La hora de entrega es obligatoria.");
   };
 
-  // ── Líneas ──
   const actualizarLinea = (key, campo, valor) => {
     setLineas((prev) =>
       prev.map((l) => {
@@ -90,7 +71,6 @@ const NuevoPedido = () => {
         return act;
       })
     );
-    // Limpiar error de esa línea si el campo cambia
     setErrLineas((prev) => ({ ...prev, [key]: "" }));
   };
 
@@ -104,7 +84,6 @@ const NuevoPedido = () => {
     setErrLineas((prev) => { const c = { ...prev }; delete c[key]; return c; });
   };
 
-  // ── Validación ──
   const validar = () => {
     let ok = true;
     const nuevosErrLineas = {};
@@ -113,12 +92,10 @@ const NuevoPedido = () => {
       setErrHora("La hora de entrega es obligatoria.");
       ok = false;
     }
-
-    if (!demoraNum || Number(demoraNum) < 1) {
+    if (!demoraMin || Number(demoraMin) < 1) {
       setErrDemora("La demora estimada es obligatoria.");
       ok = false;
     }
-
     if (lineas.length === 0) {
       setError("Debe agregar al menos una pizza al pedido.");
       return false;
@@ -146,7 +123,7 @@ const NuevoPedido = () => {
     if (!validar()) return;
     setSaving(true);
     try {
-      const demoraStr = `${demoraNum} ${demoraUnidad}`;
+      const demoraStr = `${demoraMin} min`;
       const lineasLimpias = lineas.map(({ _key, ...rest }) => ({
         ...rest,
         id: Date.now() + Math.random(),
@@ -193,7 +170,6 @@ const NuevoPedido = () => {
             placeholder="Ej: García"
             maxLength={MAX_CLIENTE}
           />
-          <span className="form-char-counter">{cliente.length} / {MAX_CLIENTE}</span>
         </div>
 
         <div className="form-row-group">
@@ -209,28 +185,20 @@ const NuevoPedido = () => {
             {errHora && <span className="form-field-error">{errHora}</span>}
           </div>
 
-          {/* Demora estimada */}
+          {/* Demora estimada — solo minutos */}
           <div className="form-row">
-            <label className="form-label">Demora estimada *</label>
-            <div className="demora-compuesta">
-              <input
-                className={`form-input demora-num${errDemora ? " form-input--error" : ""}`}
-                type="number"
-                min="1"
-                max={maxDemora}
-                value={demoraNum}
-                onChange={(e) => handleDemoraNum(e.target.value)}
-                placeholder="Ej: 30"
-              />
-              <select
-                className="form-input demora-unidad"
-                value={demoraUnidad}
-                onChange={(e) => handleDemoraUnidad(e.target.value)}
-              >
-                <option value="min">min (máx. 59)</option>
-                <option value="hs">hs (máx. 23)</option>
-              </select>
-            </div>
+            <label className="form-label">
+              Demora estimada * <span className="form-optional">(minutos — máx. {MAX_DEMORA})</span>
+            </label>
+            <input
+              className={`form-input${errDemora ? " form-input--error" : ""}`}
+              type="number"
+              min="1"
+              max={MAX_DEMORA}
+              value={demoraMin}
+              onChange={(e) => handleDemoraMin(e.target.value)}
+              placeholder="Ej: 30"
+            />
             {errDemora && <span className="form-field-error">{errDemora}</span>}
           </div>
         </div>
@@ -256,9 +224,9 @@ const NuevoPedido = () => {
         </div>
 
         {lineas.map((linea) => {
-          const pizza             = pizzaSeleccionada(linea.variedad);
-          const tiposDisponibles  = pizza?.tipos ?? [];
-          const tamaniosDisp      = pizza
+          const pizza            = pizzaSeleccionada(linea.variedad);
+          const tiposDisponibles = pizza?.tipos ?? [];
+          const tamaniosDisp     = pizza
             ? TAMANIOS.filter((t) => pizza.precios?.[t] !== undefined)
             : [];
           const errLinea = errLineas[linea._key];
@@ -268,7 +236,6 @@ const NuevoPedido = () => {
               {errLinea && <span className="form-field-error linea-error-msg">{errLinea}</span>}
 
               <div className="linea-pedido__campos">
-                {/* Variedad */}
                 <div className="form-row">
                   <label className="form-label">Variedad *</label>
                   <select
@@ -283,7 +250,6 @@ const NuevoPedido = () => {
                   </select>
                 </div>
 
-                {/* Tipo */}
                 <div className="form-row">
                   <label className="form-label">Tipo *</label>
                   <select
@@ -299,7 +265,6 @@ const NuevoPedido = () => {
                   </select>
                 </div>
 
-                {/* Tamaño */}
                 <div className="form-row">
                   <label className="form-label">Tamaño *</label>
                   <select
@@ -315,9 +280,10 @@ const NuevoPedido = () => {
                   </select>
                 </div>
 
-                {/* Cantidad */}
                 <div className="form-row">
-                  <label className="form-label">Cantidad * <span className="form-optional">(máx. {MAX_CANTIDAD})</span></label>
+                  <label className="form-label">
+                    Cantidad * <span className="form-optional">(máx. {MAX_CANTIDAD})</span>
+                  </label>
                   <input
                     className={`form-input${errLinea && (!linea.cantidad || linea.cantidad < 1) ? " form-input--error" : ""}`}
                     type="number"
@@ -328,7 +294,6 @@ const NuevoPedido = () => {
                   />
                 </div>
 
-                {/* Precio unitario (readonly) */}
                 <div className="form-row">
                   <label className="form-label">Precio unit.</label>
                   <input

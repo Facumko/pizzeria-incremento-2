@@ -7,35 +7,38 @@ import { useNavigate, useParams } from "react-router-dom";
 import { crearPizza, modificarPizza, getPizzaById } from "../../services/pizzaService";
 import "./Menu.css";
 
-const TIPOS_COCCION = ["piedra", "parrilla", "molde"];
-const TAMANIOS = [8, 10, 12];
+const TIPOS_COCCION    = ["piedra", "parrilla", "molde"];
+const TAMANIOS         = [8, 10, 12];
+const MAX_NOMBRE       = 50;
+const MAX_INGREDIENTES = 200;
+const MAX_PRECIO       = 999999;
+const MIN_PRECIO       = 1;
 
 const estadoInicial = () => ({
   nombre: "",
   ingredientes: "",
-  tipos: [],                       // array de strings seleccionados
-  precios: { 8: "", 10: "", 12: "" }, // string vacío = no disponible
+  tipos: [],
+  precios: { 8: "", 10: "", 12: "" },
 });
 
 const PizzaForm = () => {
-  const { id } = useParams();                // si existe -> modo edición
-  const navigate = useNavigate();
+  const { id }    = useParams();
+  const navigate  = useNavigate();
   const esEdicion = Boolean(id);
 
-  const [form, setForm] = useState(estadoInicial());
-  const [error, setError] = useState("");
-  const [saving, setSaving] = useState(false);
+  const [form,    setForm]    = useState(estadoInicial());
+  const [error,   setError]   = useState("");
+  const [saving,  setSaving]  = useState(false);
   const [loading, setLoading] = useState(esEdicion);
 
-  // Cargar datos existentes si es edición
   useEffect(() => {
     if (!esEdicion) return;
     getPizzaById(id)
       .then((pizza) => {
         setForm({
-          nombre: pizza.nombre,
+          nombre:       pizza.nombre,
           ingredientes: pizza.ingredientes,
-          tipos: [...pizza.tipos],
+          tipos:        [...pizza.tipos],
           precios: {
             8:  pizza.precios[8]  ?? "",
             10: pizza.precios[10] ?? "",
@@ -47,7 +50,6 @@ const PizzaForm = () => {
       .catch((e) => { setError(e.message); setLoading(false); });
   }, [id, esEdicion]);
 
-  // Toggle de tipo de cocción
   const toggleTipo = (tipo) => {
     setForm((prev) => ({
       ...prev,
@@ -58,29 +60,38 @@ const PizzaForm = () => {
   };
 
   const setPrecio = (tam, valor) => {
-    setForm((prev) => ({
-      ...prev,
-      precios: { ...prev.precios, [tam]: valor },
-    }));
+    const limpio = valor.replace(/\D/g, "");
+    if (limpio === "") {
+      setForm((prev) => ({ ...prev, precios: { ...prev.precios, [tam]: "" } }));
+      return;
+    }
+    const n = Math.min(Number(limpio), MAX_PRECIO);
+    setForm((prev) => ({ ...prev, precios: { ...prev.precios, [tam]: String(n) } }));
   };
 
-  // Validación — RF01/RF02
   const validar = () => {
-    if (!form.nombre.trim()) return "El nombre de la variedad es obligatorio.";
-    if (!form.ingredientes.trim()) return "Los ingredientes son obligatorios.";
-    if (form.tipos.length === 0) return "Seleccioná al menos un tipo de cocción.";
+    if (!form.nombre.trim())
+      return "El nombre de la variedad es obligatorio.";
+    if (form.nombre.trim().length > MAX_NOMBRE)
+      return `El nombre no puede superar los ${MAX_NOMBRE} caracteres.`;
+    if (!form.ingredientes.trim())
+      return "Los ingredientes son obligatorios.";
+    if (form.ingredientes.trim().length > MAX_INGREDIENTES)
+      return `Los ingredientes no pueden superar los ${MAX_INGREDIENTES} caracteres.`;
+    if (form.tipos.length === 0)
+      return "Seleccioná al menos un tipo de cocción.";
 
-    const tamaniosConPrecio = TAMANIOS.filter(
-      (t) => form.precios[t] !== "" && form.precios[t] !== undefined
-    );
-    if (tamaniosConPrecio.length === 0)
-      return "Ingresá el precio para al menos un tamaño.";
-
-    for (const t of tamaniosConPrecio) {
-      const val = Number(form.precios[t]);
-      if (isNaN(val) || val <= 0)
-        return `El precio para ${t} porciones debe ser un número positivo.`;
+    for (const t of TAMANIOS) {
+      const val = form.precios[t];
+      if (val === "" || val === undefined)
+        return `El precio para ${t} porciones es obligatorio.`;
+      const num = Number(val);
+      if (isNaN(num) || num < MIN_PRECIO)
+        return `El precio para ${t} porciones debe ser mayor a $0.`;
+      if (num > MAX_PRECIO)
+        return `El precio para ${t} porciones no puede superar $${MAX_PRECIO.toLocaleString("es-AR")}.`;
     }
+
     return "";
   };
 
@@ -90,27 +101,19 @@ const PizzaForm = () => {
     setError("");
     setSaving(true);
 
-    // Construir precios solo con tamaños que tienen valor
     const preciosLimpios = {};
-    TAMANIOS.forEach((t) => {
-      if (form.precios[t] !== "" && form.precios[t] !== undefined) {
-        preciosLimpios[t] = Number(form.precios[t]);
-      }
-    });
+    TAMANIOS.forEach((t) => { preciosLimpios[t] = Number(form.precios[t]); });
 
     const payload = {
-      nombre: form.nombre.trim(),
+      nombre:       form.nombre.trim(),
       ingredientes: form.ingredientes.trim(),
-      tipos: form.tipos,
-      precios: preciosLimpios,
+      tipos:        form.tipos,
+      precios:      preciosLimpios,
     };
 
     try {
-      if (esEdicion) {
-        await modificarPizza(id, payload);
-      } else {
-        await crearPizza(payload);
-      }
+      if (esEdicion) { await modificarPizza(id, payload); }
+      else           { await crearPizza(payload); }
       navigate("/menu");
     } catch (e) {
       setError(e.message);
@@ -140,25 +143,49 @@ const PizzaForm = () => {
           <p className="pizza-form__section-title">Datos de la variedad</p>
 
           <div className="pizza-form__row">
-            <label className="pizza-form__label">Nombre *</label>
+            <label className="pizza-form__label">
+              Nombre *{" "}
+              <span style={{ fontWeight: 400, color: "var(--color-text-muted)", textTransform: "none" }}>
+                (máx. {MAX_NOMBRE} caracteres)
+              </span>
+            </label>
             <input
               className="pizza-form__input"
               type="text"
               value={form.nombre}
               onChange={(e) => setForm({ ...form, nombre: e.target.value })}
               placeholder="Ej: Napolitana"
+              maxLength={MAX_NOMBRE}
             />
+            <span style={{
+              fontSize: 11, textAlign: "right",
+              color: form.nombre.length >= MAX_NOMBRE - 5 ? "var(--color-danger)" : "var(--color-text-muted)"
+            }}>
+              {form.nombre.length} / {MAX_NOMBRE}
+            </span>
           </div>
 
           <div className="pizza-form__row">
-            <label className="pizza-form__label">Ingredientes *</label>
+            <label className="pizza-form__label">
+              Ingredientes *{" "}
+              <span style={{ fontWeight: 400, color: "var(--color-text-muted)", textTransform: "none" }}>
+                (máx. {MAX_INGREDIENTES} caracteres)
+              </span>
+            </label>
             <input
               className="pizza-form__input"
               type="text"
               value={form.ingredientes}
               onChange={(e) => setForm({ ...form, ingredientes: e.target.value })}
               placeholder="Ej: Tomate, mozzarella, aceitunas"
+              maxLength={MAX_INGREDIENTES}
             />
+            <span style={{
+              fontSize: 11, textAlign: "right",
+              color: form.ingredientes.length >= MAX_INGREDIENTES - 20 ? "var(--color-danger)" : "var(--color-text-muted)"
+            }}>
+              {form.ingredientes.length} / {MAX_INGREDIENTES}
+            </span>
           </div>
         </div>
 
@@ -179,21 +206,21 @@ const PizzaForm = () => {
           </div>
         </div>
 
-        {/* ── Precios por tamaño ── */}
+        {/* ── Precios — todos obligatorios ── */}
         <div className="pizza-form__section">
-          <p className="pizza-form__section-title">Tamaños y precios</p>
+          <p className="pizza-form__section-title">Tamaños y precios *</p>
           <p style={{ fontSize: 12, color: "var(--color-text-muted)", marginBottom: 12 }}>
-            Dejá vacío los tamaños que no estén disponibles.
+            Los tres tamaños son obligatorios. Máximo ${MAX_PRECIO.toLocaleString("es-AR")} por tamaño.
           </p>
           <div className="pizza-form__precios">
             {TAMANIOS.map((tam) => (
               <div key={tam} className="pizza-form__precio-row">
-                <span className="pizza-form__precio-label">{tam} porciones</span>
+                <span className="pizza-form__precio-label">{tam} porciones *</span>
                 <input
                   className="pizza-form__precio-input"
-                  type="number"
-                  min="0"
-                  placeholder="Precio (opcional)"
+                  type="text"
+                  inputMode="numeric"
+                  placeholder="Obligatorio"
                   value={form.precios[tam]}
                   onChange={(e) => setPrecio(tam, e.target.value)}
                 />
@@ -203,16 +230,8 @@ const PizzaForm = () => {
         </div>
 
         <div className="pizza-form__actions">
-          <button
-            className="btn btn--primary"
-            onClick={handleSubmit}
-            disabled={saving}
-          >
-            {saving
-              ? "Guardando..."
-              : esEdicion
-              ? "Guardar cambios"
-              : "Registrar variedad"}
+          <button className="btn btn--primary" onClick={handleSubmit} disabled={saving}>
+            {saving ? "Guardando..." : esEdicion ? "Guardar cambios" : "Registrar variedad"}
           </button>
         </div>
       </div>
