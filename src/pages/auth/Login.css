@@ -146,7 +146,45 @@
   box-shadow: 0 0 0 3px rgba(192, 57, 43, 0.10) !important;
 }
 
-/* Error inline debajo del campo */
+/* ── Select de rol ── */
+.login-select-wrapper {
+  position: relative;
+}
+
+.login-select {
+  appearance: none;
+  -webkit-appearance: none;
+  padding-right: 36px; /* espacio para la flecha */
+  cursor: pointer;
+}
+.login-select:focus {
+  outline: none;
+  border-color: var(--color-green);
+  box-shadow: 0 0 0 3px rgba(26, 92, 56, 0.12);
+}
+
+.login-select-arrow {
+  position: absolute;
+  right: 13px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 13px;
+  color: var(--color-text-muted);
+  pointer-events: none;
+  line-height: 1;
+}
+
+/* ── Contador de caracteres ── */
+.login-char-counter {
+  display: flex;
+  justify-content: flex-end;
+  font-size: 11px;
+  font-family: var(--font-main);
+  transition: color var(--transition);
+  margin-top: 1px;
+}
+
+/* ── Mensajes de error de campo ── */
 .login-field-error {
   font-size: 12px;
   color: var(--color-danger);
@@ -160,6 +198,7 @@
   font-size: 11px;
 }
 
+/* ── Error de autenticación ── */
 .login-error {
   background: var(--color-primary-subtle);
   border: 1.5px solid #f5c6c2;
@@ -170,6 +209,7 @@
   font-weight: 500;
 }
 
+/* ── Botón principal ── */
 .login-btn {
   padding: 13px;
   background: var(--color-primary);
@@ -194,6 +234,7 @@
   cursor: not-allowed;
 }
 
+/* ── Hint ── */
 .login-hint {
   text-align: center;
   font-size: 12px;
