@@ -1,4 +1,4 @@
-// Modal.jsx — Componente compartido (acordar props con Facu)
+// Modal.jsx — Componente compartido
 // Props: isOpen, onClose, onConfirm, title, body, confirmLabel, danger
 
 import "./Modal.css";

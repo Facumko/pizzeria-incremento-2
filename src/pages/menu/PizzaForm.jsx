@@ -18,7 +18,7 @@ const estadoInicial = () => ({
 });
 
 const PizzaForm = () => {
-  const { id } = useParams();                // si existe → modo edición
+  const { id } = useParams();                // si existe -> modo edición
   const navigate = useNavigate();
   const esEdicion = Boolean(id);
 

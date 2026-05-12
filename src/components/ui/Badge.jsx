@@ -1,4 +1,3 @@
-// Badge.jsx — Componente compartido (acordar props con Facu)
 // Props: text (string), color ("pendiente" | "listo" | "facturado" | custom)
 
 import "./Badge.css";

@@ -1,6 +1,4 @@
 // AuthContext.jsx — CU-09 (Autenticación)
-// Facu — INC-01
-//
 // FASE 1: usuarios hardcodeados en memoria.
 // FASE 2: reemplazar loginUser() con fetch() a /api/auth/login
 
@@ -8,9 +6,9 @@ import { createContext, useContext, useState, useEffect } from "react";
 
 // Usuarios de prueba — Fase 1
 const USUARIOS_MOCK = [
-  { id: 1, usuario: "mostrador", contrasena: "1234", rol: "Mostrador", nombre: "María López" },
-  { id: 2, usuario: "cocina",    contrasena: "1234", rol: "Cocinero",  nombre: "Jorge Ramírez" },
-  { id: 3, usuario: "dueno",     contrasena: "1234", rol: "Dueno",     nombre: "Carlos García" },
+  { id: 1, usuario: "mostrador", contrasena: "1234", rol: "Mostrador"},
+  { id: 2, usuario: "cocina",    contrasena: "1234", rol: "Cocinero"},
+  { id: 3, usuario: "dueño",     contrasena: "1234", rol: "Dueño"},
 ];
 
 const AuthContext = createContext(null);

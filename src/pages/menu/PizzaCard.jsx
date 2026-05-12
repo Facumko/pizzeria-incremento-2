@@ -1,6 +1,4 @@
-// PizzaCard.jsx — CU-03 y CU-04
 // Muestra los datos de una variedad. Solo el Dueño ve editar/eliminar.
-// Props: pizza, onEditar, onEliminar, puedeGestionar (bool)
 
 import { useState } from "react";
 import Modal from "../../components/ui/Modal";
