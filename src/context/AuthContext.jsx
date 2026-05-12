@@ -2,15 +2,16 @@
 // Facu — INC-01
 //
 // FASE 1: usuarios hardcodeados en memoria.
+// El login ahora usa `rol` como identificador en vez de nombre de usuario.
 // FASE 2: reemplazar loginUser() con fetch() a /api/auth/login
 
 import { createContext, useContext, useState, useEffect } from "react";
 
-// Usuarios de prueba — Fase 1
+// Un usuario por rol — Fase 1
 const USUARIOS_MOCK = [
-  { id: 1, usuario: "mostrador", contrasena: "1234", rol: "Mostrador", nombre: "María López" },
-  { id: 2, usuario: "cocina",    contrasena: "1234", rol: "Cocinero",  nombre: "Jorge Ramírez" },
-  { id: 3, usuario: "dueno",     contrasena: "1234", rol: "Dueno",     nombre: "Carlos García" },
+  { id: 1, rol: "Mostrador", contrasena: "1234", nombre: "María López"   },
+  { id: 2, rol: "Cocinero",  contrasena: "1234", nombre: "Jorge Ramírez" },
+  { id: 3, rol: "Dueno",     contrasena: "1234", nombre: "Carlos García" },
 ];
 
 const AuthContext = createContext(null);
@@ -34,28 +35,29 @@ export const AuthProvider = ({ children }) => {
     }
   }, [usuario]);
 
-  // FASE 2: reemplazar cuerpo por:
-  //   const r = await fetch("http://localhost:8080/api/auth/login", {
-  //     method: "POST",
-  //     headers: { "Content-Type": "application/json" },
-  //     body: JSON.stringify({ usuario: u, contrasena: c }),
-  //   });
-  //   if (!r.ok) { setErrorLogin("Usuario o contraseña incorrectos."); return false; }
-  //   setUsuario(await r.json());
-  //   return true;
-  const loginUser = async (u, c) => {
+  // FASE 2: reemplazar cuerpo por fetch a /api/auth/login
+  // El payload cambia: { rol, contrasena } en vez de { usuario, contrasena }
+  const loginUser = async (rol, contrasena) => {
     setErrorLogin("");
-    if (!u.trim() || !c.trim()) {
-      setErrorLogin("Completá usuario y contraseña.");
+
+    if (!rol) {
+      setErrorLogin("Seleccioná un rol.");
       return false;
     }
+    if (!contrasena) {
+      setErrorLogin("Ingresá la contraseña.");
+      return false;
+    }
+
     const encontrado = USUARIOS_MOCK.find(
-      (x) => x.usuario === u.trim() && x.contrasena === c
+      (x) => x.rol === rol && x.contrasena === contrasena
     );
+
     if (!encontrado) {
-      setErrorLogin("Usuario o contraseña incorrectos.");
+      setErrorLogin("Contraseña incorrecta.");
       return false;
     }
+
     const { contrasena: _, ...datos } = encontrado;
     setUsuario(datos);
     return true;
@@ -66,7 +68,6 @@ export const AuthProvider = ({ children }) => {
     setErrorLogin("");
   };
 
-  // Helper para verificar rol (usarlo en ProtectedRoute y en lógica condicional)
   const tieneRol = (...roles) => !!usuario && roles.includes(usuario.rol);
 
   return (

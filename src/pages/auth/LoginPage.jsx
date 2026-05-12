@@ -1,66 +1,79 @@
-// LoginPage.jsx — CU-09 (Autenticar usuario) — CON VALIDACIONES COMPLETAS
+// LoginPage.jsx — CU-09 (Autenticar usuario)
+// Rol seleccionable (Mostrador / Cocinero / Dueño), contraseña con contador.
+
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import "./Login.css";
 
+const ROLES = [
+  { value: "Mostrador", label: "Mostrador" },
+  { value: "Cocinero",  label: "Cocinero"  },
+  { value: "Dueno",     label: "Dueño"     },
+];
+
+const MAX_PASSWORD = 30;
+
 const rutaInicial = (rol) => {
   if (rol === "Cocinero") return "/cocina";
-  if (rol === "Dueno") return "/menu";
+  if (rol === "Dueno")    return "/menu";
   return "/pedidos";
 };
 
 const LoginPage = () => {
   const { loginUser, errorLogin, setErrorLogin } = useAuth();
   const navigate = useNavigate();
-  const [usuario, setUsuario] = useState("");
+
+  const [rol,       setRol]       = useState("");
   const [contrasena, setContrasena] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [errores, setErrores] = useState({ usuario: "", contrasena: "" });
-  const [touched, setTouched] = useState({ usuario: false, contrasena: false });
+  const [loading,   setLoading]   = useState(false);
+  const [errores,   setErrores]   = useState({ rol: "", contrasena: "" });
+  const [touched,   setTouched]   = useState({ rol: false, contrasena: false });
 
   const validarCampo = (nombre, valor) => {
-    if (nombre === "usuario") {
-      if (!valor.trim()) return "El usuario es obligatorio.";
-      if (valor.trim().length < 3) return "El usuario debe tener al menos 3 caracteres.";
-      if (/\s/.test(valor)) return "El usuario no puede contener espacios.";
+    if (nombre === "rol") {
+      if (!valor) return "Seleccioná un rol.";
     }
     if (nombre === "contrasena") {
-      if (!valor) return "La contraseña es obligatoria.";
-      if (valor.length < 4) return "La contraseña debe tener al menos 4 caracteres.";
+      if (!valor)          return "La contraseña es obligatoria.";
+      if (valor.length < 4) return "Mínimo 4 caracteres.";
     }
     return "";
   };
 
-  const handleChange = (nombre, valor) => {
-    if (nombre === "usuario") setUsuario(valor);
-    else setContrasena(valor);
-
-    if (touched[nombre]) {
-      setErrores((prev) => ({ ...prev, [nombre]: validarCampo(nombre, valor) }));
-    }
-    // Limpiar error de autenticación al escribir
+  const handleChangeRol = (valor) => {
+    setRol(valor);
     if (errorLogin) setErrorLogin("");
+    if (touched.rol)
+      setErrores((prev) => ({ ...prev, rol: validarCampo("rol", valor) }));
+  };
+
+  const handleChangePassword = (valor) => {
+    setContrasena(valor);
+    if (errorLogin) setErrorLogin("");
+    if (touched.contrasena)
+      setErrores((prev) => ({ ...prev, contrasena: validarCampo("contrasena", valor) }));
   };
 
   const handleBlur = (nombre) => {
-    const valor = nombre === "usuario" ? usuario : contrasena;
+    const valor = nombre === "rol" ? rol : contrasena;
     setTouched((prev) => ({ ...prev, [nombre]: true }));
     setErrores((prev) => ({ ...prev, [nombre]: validarCampo(nombre, valor) }));
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    // Marcar todos como tocados
-    setTouched({ usuario: true, contrasena: true });
-    const errU = validarCampo("usuario", usuario);
+    setTouched({ rol: true, contrasena: true });
+    const errR = validarCampo("rol",       rol);
     const errC = validarCampo("contrasena", contrasena);
-    setErrores({ usuario: errU, contrasena: errC });
-    if (errU || errC) return;
+    setErrores({ rol: errR, contrasena: errC });
+    if (errR || errC) return;
 
     setLoading(true);
-    const ok = await loginUser(usuario, contrasena);
+    // loginUser recibe el rol como "usuario" — AuthContext lo maneja
+    const ok = await loginUser(rol, contrasena);
     setLoading(false);
+
     if (ok) {
       try {
         const sesion = JSON.parse(localStorage.getItem("pizzeria_sesion"));
@@ -70,6 +83,12 @@ const LoginPage = () => {
       }
     }
   };
+
+  const charsRestantes = MAX_PASSWORD - contrasena.length;
+  const contadorColor  =
+    charsRestantes <= 20  ? "var(--color-danger)"  :
+    charsRestantes <= 50  ? "var(--color-pendiente)" :
+    "var(--color-text-muted)";
 
   return (
     <div className="login-page">
@@ -93,25 +112,31 @@ const LoginPage = () => {
             </div>
           )}
 
+          {/* ── Selector de rol ── */}
           <div className="login-field">
-            <label className="login-label" htmlFor="usuario">Usuario</label>
-            <input
-              id="usuario"
-              className={`login-input${errores.usuario && touched.usuario ? " login-input--error" : ""}`}
-              type="text"
-              value={usuario}
-              onChange={(e) => handleChange("usuario", e.target.value)}
-              onBlur={() => handleBlur("usuario")}
-              placeholder="Ej: mostrador"
-              autoComplete="username"
-              autoFocus
-              maxLength={40}
-            />
-            {errores.usuario && touched.usuario && (
-              <span className="login-field-error">{errores.usuario}</span>
+            <label className="login-label" htmlFor="rol">Rol</label>
+            <div className="login-select-wrapper">
+              <select
+                id="rol"
+                className={`login-input login-select${errores.rol && touched.rol ? " login-input--error" : ""}`}
+                value={rol}
+                onChange={(e) => handleChangeRol(e.target.value)}
+                onBlur={() => handleBlur("rol")}
+                autoFocus
+              >
+                <option value="">Seleccionar Usuario</option>
+                {ROLES.map((r) => (
+                  <option key={r.value} value={r.value}>{r.label}</option>
+                ))}
+              </select>
+              <span className="login-select-arrow">▾</span>
+            </div>
+            {errores.rol && touched.rol && (
+              <span className="login-field-error">{errores.rol}</span>
             )}
           </div>
 
+          {/* ── Contraseña ── */}
           <div className="login-field">
             <label className="login-label" htmlFor="contrasena">Contraseña</label>
             <input
@@ -119,12 +144,20 @@ const LoginPage = () => {
               className={`login-input${errores.contrasena && touched.contrasena ? " login-input--error" : ""}`}
               type="password"
               value={contrasena}
-              onChange={(e) => handleChange("contrasena", e.target.value)}
+              onChange={(e) => handleChangePassword(e.target.value)}
               onBlur={() => handleBlur("contrasena")}
               placeholder="••••••••"
               autoComplete="current-password"
-              maxLength={50}
+              maxLength={MAX_PASSWORD}
             />
+            {/* Contador de caracteres */}
+            <div className="login-char-counter">
+              <span style={{ color: contadorColor, fontWeight: charsRestantes <= 20 ? 700 : 400 }}>
+                {contrasena.length > 0
+                  ? `${contrasena.length} / ${MAX_PASSWORD} caracteres`
+                  : `Máx. ${MAX_PASSWORD} caracteres`}
+              </span>
+            </div>
             {errores.contrasena && touched.contrasena && (
               <span className="login-field-error">{errores.contrasena}</span>
             )}
@@ -135,8 +168,7 @@ const LoginPage = () => {
           </button>
 
           <p className="login-hint">
-            Usuarios: <strong>mostrador</strong> / <strong>cocina</strong> / <strong>dueno</strong> — contraseña: <strong>1234</strong>
-          </p>
+            </p>
         </form>
       </div>
     </div>
