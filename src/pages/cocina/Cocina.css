@@ -19,11 +19,24 @@
 
 .cocina-header {
   display: flex;
-  align-items: baseline;
+  align-items: center;
   gap: var(--space-md);
   margin-bottom: var(--space-xl);
   padding-bottom: var(--space-lg);
   border-bottom: 2px solid rgba(255,255,255,0.10);
+}
+
+.cocina-header__logo-container {
+  width: 50px;
+  height: 50px;
+  display: flex;
+  align-items: center;
+}
+
+.cocina-header__logo-img {
+  width: 100%;
+  height: auto;
+  object-fit: contain;
 }
 
 .cocina-title {
@@ -60,15 +73,20 @@
   gap: var(--space-md);
 }
 
-.cocina-empty__icon {
-  font-size: 72px;
-  color: var(--color-green-light);
-  opacity: 0.7;
+.cocina-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-2xl) 0;
+  color: rgba(255,255,255,0.30);
+  gap: var(--space-md);
 }
 
-.cocina-empty p {
-  font-size: var(--font-size-xl);
-  font-weight: 600;
+.cocina-empty__img {
+  width: 250px;
+  height: auto;
+  opacity: 0.6;
 }
 
 /* ── Grid de tarjetas ── */
@@ -79,24 +97,22 @@
 }
 
 .cocina-card {
-  background: rgba(255,255,255,0.06);
-  border: 1.5px solid rgba(255,255,255,0.10);
+  background: var(--color-surface-alt); 
+  border: 1px solid var(--color-border);
   border-radius: var(--radius-lg);
   padding: var(--space-lg);
   display: flex;
   flex-direction: column;
   gap: var(--space-sm);
-  /* Evita que el contenido interno rompa el ancho de la card */
-  min-width: 0;
-  overflow: hidden;
-  transition: border-color var(--transition), background var(--transition), transform var(--transition);
-  backdrop-filter: blur(4px);
+  transition: all var(--transition);
+  box-shadow: var(--shadow-md); 
 }
+
 .cocina-card:hover {
-  border-color: var(--color-primary-light);
-  background: rgba(255,255,255,0.09);
-  transform: translateY(-2px);
-  box-shadow: 0 8px 24px rgba(0,0,0,0.25);
+  border-color: var(--color-primary);
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-lg);
+  background: #fff;
 }
 
 .cocina-card__header {
@@ -110,10 +126,8 @@
 .cocina-card__nro {
   font-size: 26px;
   font-weight: 800;
-  color: #fff;
+  color: var(--color-text);
   letter-spacing: -1px;
-  /* No se encoge ni crece para que el badge no lo aplaste */
-  flex-shrink: 0;
 }
 
 .cocina-card__hora {
@@ -124,7 +138,6 @@
   padding: 3px 10px;
   border-radius: 20px;
   border: 1px solid var(--color-pendiente-border);
-  /* Si la hora es larga, que haga wrap en vez de romper el layout */
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -133,21 +146,13 @@
 
 .cocina-card__cliente {
   font-size: var(--font-size-base);
-  color: rgba(255,255,255,0.80);
-  font-weight: 600;
-  /* Truncar nombre largo con ellipsis */
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  min-width: 0;
+  color: var(--color-text-secondary);
+  font-weight: 700;
 }
 
 .cocina-card__demora {
   font-size: var(--font-size-sm);
-  color: rgba(255,255,255,0.45);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  color: var(--color-text-muted);
 }
 
 .cocina-card__lineas {
@@ -157,10 +162,8 @@
   gap: 8px;
   margin: var(--space-sm) 0;
   padding: var(--space-md) 0;
-  border-top: 1px solid rgba(255,255,255,0.10);
-  border-bottom: 1px solid rgba(255,255,255,0.10);
-  /* La lista no puede romper el contenedor */
-  min-width: 0;
+  border-top: 1.5px solid var(--color-border);
+  border-bottom: 1.5px solid var(--color-border);
 }
 
 .cocina-card__linea {
@@ -175,34 +178,34 @@
   font-size: var(--font-size-xl);
   font-weight: 800;
   color: var(--color-primary-light);
-  /* Ancho fijo para que la descripción arranque siempre en el mismo punto */
   min-width: 36px;
   flex-shrink: 0;
   letter-spacing: -1px;
 }
 
 .cocina-card__desc {
-  color: rgba(255,255,255,0.85);
+  color: var(--color-text);
   text-transform: capitalize;
-  font-weight: 500;
-  /* Wrap normal: si el nombre es largo, corta en múltiples líneas
-     dentro de la card en vez de desbordarse */
-  word-break: break-word;
-  overflow-wrap: break-word;
-  min-width: 0;
+  font-weight: 600;
 }
 
 .cocina-card__btn {
-  width: 100%;
-  margin-top: var(--space-sm);
-  padding: 13px;
-  font-size: var(--font-size-base);
+  align-self: center;
+  width: auto;
+  min-width: 120px;
+  padding: 8px 20px;
+  display: flex;
+  align-items: center;
   justify-content: center;
+  text-align: center;
+  margin-top: var(--space-md);
   background: var(--color-primary);
+  color: #fff;
+  border: none;
   border-radius: var(--radius-md);
+  font-size: 14px;          /* Texto un poco más pequeño */
   font-weight: 700;
-  letter-spacing: 0.2px;
-  box-shadow: 0 3px 10px rgba(192,57,43,0.35);
+  cursor: pointer;
 }
 .cocina-card__btn:hover:not(:disabled) {
   background: var(--color-primary-dark);

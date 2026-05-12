@@ -95,7 +95,7 @@ const LoginPage = () => {
             />
           </div>
           <h1 className="login-card__title">Pizzería</h1>
-          <p className="login-card__subtitle">Sistema de gestión</p>
+          <p className="login-card__subtitle">Gestión</p>
         </div>
 
         <form className="login-card__body" onSubmit={handleSubmit} noValidate>

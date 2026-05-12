@@ -46,7 +46,15 @@ const VistaCocina = () => {
   return (
     <div className="cocina-container">
       <div className="cocina-header">
-        <h1 className="cocina-title">🍕 Cocina</h1>
+        <div className="cocina-header__logo-container">
+          <img 
+            src="/logo-cocina.png" 
+            alt="Logo Cocina" 
+            className="cocina-header__logo-img" 
+          />
+        </div>
+        
+        <h1 className="cocina-title">Cocina</h1>
         <span className="cocina-subtitle">
           {loading ? "Actualizando..." : `${pedidos.length} pedido${pedidos.length !== 1 ? "s" : ""} pendiente${pedidos.length !== 1 ? "s" : ""}`}
         </span>
@@ -56,7 +64,11 @@ const VistaCocina = () => {
 
       {!loading && pedidos.length === 0 && (
         <div className="cocina-empty">
-          <span className="cocina-empty__icon">✓</span>
+          <img 
+            src="/pizza-duerme.png" 
+            alt="No hay pedidos" 
+            className="cocina-empty__img" 
+          />
           <p>No hay pedidos pendientes</p>
         </div>
       )}
@@ -90,7 +102,7 @@ const VistaCocina = () => {
               className="btn btn--primary cocina-card__btn"
               onClick={() => abrirModal(p)}
             >
-              ✓ Marcar como Listo
+              ✓ Listo
             </button>
           </div>
         ))}

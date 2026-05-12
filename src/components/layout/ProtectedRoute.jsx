@@ -1,5 +1,5 @@
 // Wrapper que protege rutas según rol del usuario autenticado.
-// Props: roles (array de strings) — ej: ["Mostrador", "Dueno"]
+// Props: roles (array de strings) — ej: ["Mostrador", "Dueño"]
 
 import { Navigate, useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
@@ -11,7 +11,7 @@ const ProtectedRoute = ({ roles, children }) => {
   // No autenticado → al login
   if (!usuario) return <Navigate to="/login" replace />;
 
-  // Autenticado pero sin el rol necesario → pantalla de sin acceso
+  // Autenticado pero sin el rol necesario -> pantalla de sin acceso
   // (evita loops de redirección)
   if (roles && !roles.includes(usuario.rol)) {
     return (

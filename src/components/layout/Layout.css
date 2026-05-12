@@ -17,15 +17,15 @@
 .sidebar__brand {
   padding: 28px 22px 20px;
   border-bottom: 1px solid rgba(255,255,255,0.10);
-  display: flex;       /* Alineación horizontal */
-  align-items: center; /* Centrado vertical */
-  gap: 12px;           /* Espacio entre imagen y texto */
+  display: flex;
+  align-items: center;
+  gap: 12px;
 } 
 
 /* Contenedor del logo */
 .sidebar__logo-container {
-  width: 40px;  /* Tamaño compacto para el sidebar */
-  height: 40px;
+  width: 60px;
+  height: 60px;
   flex-shrink: 0;
 }
 
@@ -47,14 +47,6 @@
   letter-spacing: 1.1px;
 }
 
-.sidebar__brand-sub {
-  font-size: 10px;
-  color: rgba(255,255,255,0.50);
-  text-transform: uppercase;
-  letter-spacing: 0.8px;
-  margin-top: 2px;
-}
-
 .sidebar__nav {
   flex: 1;
   padding: 14px 0;
@@ -64,49 +56,40 @@
 }
 
 .sidebar__link {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 11px 22px;
+  display: block;
+  padding: 12px 24px;
   color: rgba(255,255,255,0.70);
   font-size: 14px;
   font-weight: 500;
   text-decoration: none;
-  cursor: pointer;
-  background: none;
-  border: none;
-  width: 100%;
-  text-align: left;
-  border-left: 3px solid transparent;
-  transition: background var(--transition), color var(--transition), border-color var(--transition);
+  border-left: 4px solid transparent;
+  transition: all 0.2s ease;
 }
 
 .sidebar__link:hover {
-  background: rgba(255,255,255,0.08);
+  background: rgba(255,255,255,0.05);
   color: #fff;
+  padding-left: 32px;
 }
 
 .sidebar__link--active {
-  background: rgba(255,255,255,0.12);
+  background: rgba(255,255,255,0.1);
   color: #fff;
-  font-weight: 600;
-  border-left-color: #fff;
+  font-weight: 800;
+  border-left-color: var(--color-primary);
 }
 
 .sidebar__link-icon {
-  font-size: 16px;
-  width: 20px;
-  text-align: center;
+  display: none;
 }
 
 .sidebar__section-label {
+  padding: 24px 28px 8px; 
   font-size: 10px;
+  color: rgba(255,255,255,0.3);
   text-transform: uppercase;
-  letter-spacing: 1.4px;
-  color: rgba(255,255,255,0.30);
-  padding: 16px 22px 6px;
+  letter-spacing: 1.5px;
 }
-
 .sidebar__footer {
   padding: 16px 22px;
   border-top: 1px solid rgba(255,255,255,0.10);
@@ -132,21 +115,36 @@
 
 .sidebar__logout {
   width: 100%;
-  padding: 8px 12px;
-  background: rgba(255,255,255,0.08);
-  border: 1px solid rgba(255,255,255,0.15);
+  /* Ajustamos la altura y quitamos padding lateral excesivo */
+  height: 34px; 
+  padding: 0; 
+  
+  /* Centrado total */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px; /* Espacio entre el icono ↩ y el texto */
+  
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.15);
   border-radius: var(--radius-sm);
-  color: rgba(255,255,255,0.75);
-  font-size: 13px;
-  cursor: pointer;
-  transition: background var(--transition), color var(--transition);
-  text-align: left;
+  color: rgba(255, 255, 255, 0.75);
+  
+  /* Tipografía más pequeña y centrada */
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1;
+  text-align: center;
   font-family: var(--font-main);
+  
+  cursor: pointer;
+  transition: all var(--transition);
 }
+
 .sidebar__logout:hover {
-  background: rgba(192,57,43,0.40);
+  background: rgba(192, 57, 43, 0.40);
   color: #fff;
-  border-color: rgba(192,57,43,0.5);
+  border-color: rgba(192, 57, 43, 0.5);
 }
 
 /* ── App layout ── */
