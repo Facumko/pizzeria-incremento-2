@@ -10,7 +10,7 @@ const LINKS_MOSTRADOR = [
   { to: "/menu",    icon: "🍕", label: "Menú" },
 ];
 
-const LINKS_COCINERO = [
+const LINKS_COCINA = [
   { to: "/cocina", icon: "👨‍🍳", label: "Cocina" },
 ];
 
@@ -20,7 +20,7 @@ const LINKS_DUEÑO = [
 
 const getLinksByRol = (rol) => {
   if (rol === "Mostrador") return LINKS_MOSTRADOR;
-  if (rol === "Cocinero")  return LINKS_COCINERO;
+  if (rol === "Cocina")    return LINKS_COCINA;
   if (rol === "Dueño")     return LINKS_DUEÑO;
   return [];
 };
@@ -29,8 +29,8 @@ const Sidebar = () => {
   const { usuario, logoutUser } = useAuth();
   const navigate = useNavigate();
 
-  const handleLogout = () => {
-    logoutUser();
+  const handleLogout = async () => {
+    await logoutUser();
     navigate("/login", { replace: true });
   };
 
