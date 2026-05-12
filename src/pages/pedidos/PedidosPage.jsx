@@ -65,7 +65,7 @@ const PedidosPage = () => {
               <div className="pedido-row__left">
                 <span className="pedido-nro">#{p.nroPedido}</span>
                 <div>
-                  <p className="pedido-cliente">{p.cliente || <em>Sin nombre</em>}</p>
+                  <p className="pedido-cliente">{p.cliente || <em>Mario Quinteros</em>}</p>
                   <p className="pedido-meta">
                     {p.fecha} · Entrega: {p.horaEntrega} · Demora: {p.demoraEstimada}
                   </p>
