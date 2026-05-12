@@ -1,5 +1,4 @@
-// MenuPage.jsx — CU-01, CU-02, CU-03, CU-04
-// Facu — INC-01
+// MenuPage.jsx
 // Acceso: Mostrador (solo consulta) | Dueño (CRUD completo)
 
 import { useState, useEffect } from "react";
@@ -63,7 +62,7 @@ const MenuPage = () => {
   return (
     <div className="page-container">
       <div className="page-header">
-        <h1 className="page-title">Menú de pizzas</h1>
+        <h1 className="page-title">MENÚ</h1>
         {esDueno && (
           <button
             className="btn btn--primary"

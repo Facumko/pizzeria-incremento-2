@@ -1,6 +1,4 @@
 // AuthContext.jsx — CU-09 (Autenticación)
-// Facu — INC-01
-//
 // FASE 1: usuarios hardcodeados en memoria.
 // El login ahora usa `rol` como identificador en vez de nombre de usuario.
 // FASE 2: reemplazar loginUser() con fetch() a /api/auth/login
@@ -9,9 +7,9 @@ import { createContext, useContext, useState, useEffect } from "react";
 
 // Un usuario por rol — Fase 1
 const USUARIOS_MOCK = [
-  { id: 1, rol: "Mostrador", contrasena: "1234", nombre: "María López"   },
-  { id: 2, rol: "Cocinero",  contrasena: "1234", nombre: "Jorge Ramírez" },
-  { id: 3, rol: "Dueno",     contrasena: "1234", nombre: "Carlos García" },
+  { id: 1, usuario: "mostrador", contrasena: "1234", rol: "Mostrador"},
+  { id: 2, usuario: "cocina",    contrasena: "1234", rol: "Cocinero"},
+  { id: 3, usuario: "dueño",     contrasena: "1234", rol: "Dueño"},
 ];
 
 const AuthContext = createContext(null);
