@@ -10,7 +10,7 @@ const LINKS_MOSTRADOR = [
   { to: "/menu", label: "Menú" },
 ];
 
-const LINKS_COCINERO = [
+const LINKS_COCINA = [
   { to: "/cocina", label: "Cocina" },
 ];
 
