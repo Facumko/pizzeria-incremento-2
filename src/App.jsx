@@ -18,7 +18,7 @@ import "./styles/global.css";
 // Ruta de inicio según el rol del usuario
 const rutaInicial = (rol) => {
   if (rol === "Cocinero") return "/cocina";
-  if (rol === "Dueno")    return "/menu";
+  if (rol === "Dueño")    return "/menu";
   return "/pedidos";
 };
 
@@ -50,7 +50,7 @@ const AppRoutes = () => {
       <Route
         path="/menu"
         element={
-          <ProtectedRoute roles={["Dueno", "Mostrador"]}>
+          <ProtectedRoute roles={["Dueño", "Mostrador"]}>
             <AppLayout><MenuPage /></AppLayout>
           </ProtectedRoute>
         }
@@ -58,7 +58,7 @@ const AppRoutes = () => {
       <Route
         path="/menu/nueva"
         element={
-          <ProtectedRoute roles={["Dueno"]}>
+          <ProtectedRoute roles={["Dueño"]}>
             <AppLayout><PizzaForm /></AppLayout>
           </ProtectedRoute>
         }
@@ -66,7 +66,7 @@ const AppRoutes = () => {
       <Route
         path="/menu/editar/:id"
         element={
-          <ProtectedRoute roles={["Dueno"]}>
+          <ProtectedRoute roles={["Dueño"]}>
             <AppLayout><PizzaForm /></AppLayout>
           </ProtectedRoute>
         }

@@ -14,7 +14,7 @@ const MAX_BUSQUEDA = 100;
 const MenuPage = () => {
   const navigate = useNavigate();
   const { tieneRol } = useAuth();
-  const esDueno = tieneRol("Dueno");
+  const esDueño = tieneRol("Dueño");
 
   const [pizzas,     setPizzas]     = useState([]);
   const [loading,    setLoading]    = useState(true);
@@ -64,7 +64,7 @@ const MenuPage = () => {
     <div className="page-container">
       <div className="page-header">
         <h1 className="page-title">MENÚ</h1>
-        {esDueno && (
+        {esDueño && (
           <button
             className="btn btn--primary"
             onClick={() => navigate("/menu/nueva")}
@@ -117,7 +117,7 @@ const MenuPage = () => {
             <PizzaCard
               key={pizza.id}
               pizza={pizza}
-              puedeGestionar={esDueno}
+              puedeGestionar={esDueño}
               onEditar={(p) => navigate(`/menu/editar/${p.id}`)}
               onEliminar={handleEliminar}
             />
