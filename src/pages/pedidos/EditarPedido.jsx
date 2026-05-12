@@ -8,37 +8,39 @@ import { getPedidoById, modificarPedido, calcularTotal } from "../../services/pe
 import { getPizzas } from "../../services/pizzaService";
 import "./Pedidos.css";
 
-const TAMANIOS        = [8, 10, 12];
-const MAX_LINEAS      = 50;
-const MAX_CANTIDAD    = 99;
-const MAX_CLIENTE     = 50;
-const MAX_DEMORA_MIN  = 59;
-const MAX_DEMORA_HS   = 23;
+const TAMANIOS     = [8, 10, 12];
+const MAX_LINEAS   = 50;
+const MAX_CANTIDAD = 99;
+const MAX_CLIENTE  = 50;
+const MAX_DEMORA   = 999; // minutos
 
-// Parsea "30 min" o "2 hs" → { num, unidad }
-const parseDemora = (str = "") => {
-  const partes = str.trim().split(" ");
-  const num    = partes[0] ?? "";
-  const unidad = partes[1] === "hs" ? "hs" : "min";
-  return { num, unidad };
+// Parsea "30 min" o "2 hs 30 min" → número de minutos como string
+const parseDemoraMin = (str = "") => {
+  // Soporta tanto "45 min" como el formato viejo "2 hs"
+  const matchMin = str.match(/(\d+)\s*min/);
+  const matchHs  = str.match(/(\d+)\s*hs/);
+  if (matchMin) return matchMin[1];
+  if (matchHs)  return String(Number(matchHs[1]) * 60);
+  // fallback: primer número
+  const num = str.match(/\d+/);
+  return num ? num[0] : "";
 };
 
 const EditarPedido = () => {
-  const { id }    = useParams();
-  const navigate  = useNavigate();
+  const { id }   = useParams();
+  const navigate = useNavigate();
 
-  const [pizzas,       setPizzas]       = useState([]);
-  const [cliente,      setCliente]      = useState("");
-  const [horaEntrega,  setHoraEntrega]  = useState("");
-  const [demoraNum,    setDemoraNum]    = useState("");
-  const [demoraUnidad, setDemoraUnidad] = useState("min");
-  const [lineas,       setLineas]       = useState([]);
-  const [error,        setError]        = useState("");
-  const [saving,       setSaving]       = useState(false);
-  const [loading,      setLoading]      = useState(true);
-  const [errLineas,    setErrLineas]    = useState({});
-  const [errDemora,    setErrDemora]    = useState("");
-  const [errHora,      setErrHora]      = useState("");
+  const [pizzas,      setPizzas]      = useState([]);
+  const [cliente,     setCliente]     = useState("");
+  const [horaEntrega, setHoraEntrega] = useState("");
+  const [demoraMin,   setDemoraMin]   = useState("");
+  const [lineas,      setLineas]      = useState([]);
+  const [error,       setError]       = useState("");
+  const [saving,      setSaving]      = useState(false);
+  const [loading,     setLoading]     = useState(true);
+  const [errLineas,   setErrLineas]   = useState({});
+  const [errDemora,   setErrDemora]   = useState("");
+  const [errHora,     setErrHora]     = useState("");
 
   useEffect(() => {
     Promise.all([getPedidoById(id), getPizzas()])
@@ -48,11 +50,9 @@ const EditarPedido = () => {
           setLoading(false);
           return;
         }
-        const { num, unidad } = parseDemora(pedido.demoraEstimada);
         setCliente(pedido.cliente || "");
         setHoraEntrega(pedido.horaEntrega);
-        setDemoraNum(num);
-        setDemoraUnidad(unidad);
+        setDemoraMin(parseDemoraMin(pedido.demoraEstimada));
         setLineas(pedido.lineas.map((l) => ({ ...l, _key: l.id })));
         setPizzas(menuPizzas);
         setLoading(false);
@@ -62,23 +62,12 @@ const EditarPedido = () => {
 
   const pizzaSeleccionada = (nombre) => pizzas.find((p) => p.nombre === nombre);
 
-  const maxDemora = demoraUnidad === "min" ? MAX_DEMORA_MIN : MAX_DEMORA_HS;
-
-  const handleDemoraNum = (val) => {
+  const handleDemoraMin = (val) => {
     const limpio = val.replace(/\D/g, "");
-    if (limpio === "") { setDemoraNum(""); setErrDemora(""); return; }
-    const n = Math.min(Number(limpio), maxDemora);
-    setDemoraNum(String(n));
+    if (limpio === "") { setDemoraMin(""); setErrDemora(""); return; }
+    const n = Math.min(Number(limpio), MAX_DEMORA);
+    setDemoraMin(String(n));
     setErrDemora(n < 1 ? "Ingresá un valor válido." : "");
-  };
-
-  const handleDemoraUnidad = (val) => {
-    setDemoraUnidad(val);
-    if (demoraNum !== "") {
-      const max = val === "min" ? MAX_DEMORA_MIN : MAX_DEMORA_HS;
-      setDemoraNum(String(Math.min(Number(demoraNum), max)));
-    }
-    setErrDemora("");
   };
 
   const handleHora = (val) => {
@@ -120,9 +109,9 @@ const EditarPedido = () => {
     let ok = true;
     const nuevosErr = {};
 
-    if (!horaEntrega) { setErrHora("La hora de entrega es obligatoria."); ok = false; }
-    if (!demoraNum || Number(demoraNum) < 1) { setErrDemora("La demora estimada es obligatoria."); ok = false; }
-    if (lineas.length === 0) { setError("Debe haber al menos una pizza en el pedido."); return false; }
+    if (!horaEntrega)                     { setErrHora("La hora de entrega es obligatoria."); ok = false; }
+    if (!demoraMin || Number(demoraMin) < 1) { setErrDemora("La demora estimada es obligatoria."); ok = false; }
+    if (lineas.length === 0)              { setError("Debe haber al menos una pizza en el pedido."); return false; }
 
     for (const l of lineas) {
       const msgs = [];
@@ -151,7 +140,7 @@ const EditarPedido = () => {
       await modificarPedido(id, {
         cliente,
         horaEntrega,
-        demoraEstimada: `${demoraNum} ${demoraUnidad}`,
+        demoraEstimada: `${demoraMin} min`,
         lineas: lineasLimpias,
       });
       navigate("/pedidos");
@@ -193,7 +182,6 @@ const EditarPedido = () => {
                 onChange={(e) => setCliente(e.target.value)}
                 maxLength={MAX_CLIENTE}
               />
-              <span className="form-char-counter">{cliente.length} / {MAX_CLIENTE}</span>
             </div>
 
             <div className="form-row-group">
@@ -209,26 +197,18 @@ const EditarPedido = () => {
               </div>
 
               <div className="form-row">
-                <label className="form-label">Demora estimada *</label>
-                <div className="demora-compuesta">
-                  <input
-                    className={`form-input demora-num${errDemora ? " form-input--error" : ""}`}
-                    type="number"
-                    min="1"
-                    max={maxDemora}
-                    value={demoraNum}
-                    onChange={(e) => handleDemoraNum(e.target.value)}
-                    placeholder="Ej: 30"
-                  />
-                  <select
-                    className="form-input demora-unidad"
-                    value={demoraUnidad}
-                    onChange={(e) => handleDemoraUnidad(e.target.value)}
-                  >
-                    <option value="min">min (máx. 59)</option>
-                    <option value="hs">hs (máx. 23)</option>
-                  </select>
-                </div>
+                <label className="form-label">
+                  Demora estimada * <span className="form-optional">(minutos — máx. {MAX_DEMORA})</span>
+                </label>
+                <input
+                  className={`form-input${errDemora ? " form-input--error" : ""}`}
+                  type="number"
+                  min="1"
+                  max={MAX_DEMORA}
+                  value={demoraMin}
+                  onChange={(e) => handleDemoraMin(e.target.value)}
+                  placeholder="Ej: 30"
+                />
                 {errDemora && <span className="form-field-error">{errDemora}</span>}
               </div>
             </div>
@@ -299,7 +279,9 @@ const EditarPedido = () => {
                     </div>
 
                     <div className="form-row">
-                      <label className="form-label">Cantidad * <span className="form-optional">(máx. {MAX_CANTIDAD})</span></label>
+                      <label className="form-label">
+                        Cantidad * <span className="form-optional">(máx. {MAX_CANTIDAD})</span>
+                      </label>
                       <input
                         className={`form-input${errLinea && (!linea.cantidad || linea.cantidad < 1) ? " form-input--error" : ""}`}
                         type="number"

@@ -1,5 +1,5 @@
 /* ============================================================
-   Pedidos.css — INC-01 — estética actualizada
+   Pedidos.css — INC-01
    ============================================================ */
 @import "../../styles/variables.css";
 @import "../../components/ui/Modal.css";
@@ -24,6 +24,7 @@
   cursor: pointer;
   transition: all var(--transition);
   font-family: var(--font-main);
+  white-space: nowrap;
 }
 .filtro-btn:hover {
   border-color: var(--color-primary);
@@ -42,6 +43,8 @@
   display: flex;
   flex-direction: column;
   gap: 10px;
+  width: 100%;
+  min-width: 0;
 }
 
 .pedido-row {
@@ -51,6 +54,11 @@
   cursor: pointer;
   transition: box-shadow var(--transition), border-color var(--transition), transform var(--transition);
   border-left: 4px solid transparent;
+  /* No desborda el contenedor */
+  min-width: 0;
+  overflow: hidden;
+  flex-wrap: wrap;
+  gap: var(--space-sm);
 }
 .pedido-row:hover {
   box-shadow: var(--shadow-md);
@@ -62,6 +70,8 @@
   display: flex;
   align-items: center;
   gap: var(--space-md);
+  min-width: 0;
+  flex: 1;
 }
 
 .pedido-nro {
@@ -69,6 +79,7 @@
   font-weight: 800;
   color: var(--color-border-strong);
   min-width: 48px;
+  flex-shrink: 0;
   letter-spacing: -1px;
 }
 
@@ -76,31 +87,43 @@
   font-weight: 700;
   font-size: var(--font-size-base);
   color: var(--color-text);
+  /* Truncar nombres muy largos */
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 260px;
 }
 
 .pedido-meta {
   font-size: var(--font-size-sm);
   color: var(--color-text-muted);
   margin-top: 2px;
+  /* Wrap en vez de desbordar */
+  white-space: normal;
+  word-break: break-word;
 }
 
 .pedido-row__right {
   display: flex;
   align-items: center;
   gap: var(--space-md);
+  flex-shrink: 0;
+  flex-wrap: wrap;
+  justify-content: flex-end;
 }
 
 .pedido-total {
   font-weight: 800;
   font-size: var(--font-size-lg);
   color: var(--color-primary);
-  min-width: 100px;
+  min-width: 80px;
   text-align: right;
+  white-space: nowrap;
 }
 
 /* ── Formulario ── */
 .form-section__title {
-  font-size: var(--font-size-base);
+  font-size: 12px;
   font-weight: 700;
   color: var(--color-text-secondary);
   margin-bottom: var(--space-md);
@@ -108,7 +131,6 @@
   border-bottom: 2px solid var(--color-border);
   text-transform: uppercase;
   letter-spacing: 0.4px;
-  font-size: 12px;
 }
 
 .form-row {
@@ -150,6 +172,8 @@
   background: var(--color-surface);
   transition: border-color var(--transition), box-shadow var(--transition);
   width: 100%;
+  min-width: 0;
+  font-family: var(--font-main);
 }
 .form-input:focus {
   outline: none;
@@ -166,6 +190,22 @@
   color: var(--color-text-muted);
   cursor: not-allowed;
 }
+.form-input--error {
+  border-color: var(--color-danger) !important;
+  box-shadow: 0 0 0 3px rgba(192, 57, 43, 0.10) !important;
+}
+
+.form-char-counter {
+  font-size: 11px;
+  color: var(--color-text-muted);
+  text-align: right;
+}
+
+.form-field-error {
+  font-size: 12px;
+  color: var(--color-danger);
+  font-weight: 500;
+}
 
 /* ── Líneas de pedido ── */
 .lineas-header {
@@ -173,6 +213,15 @@
   align-items: center;
   justify-content: space-between;
   margin-bottom: var(--space-md);
+  flex-wrap: wrap;
+  gap: var(--space-sm);
+}
+
+.lineas-contador {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--color-text-muted);
+  margin-left: var(--space-sm);
 }
 
 .linea-pedido {
@@ -181,14 +230,25 @@
   gap: var(--space-sm);
   padding: var(--space-md) 0;
   border-bottom: 1px solid var(--color-border);
+  min-width: 0;
 }
 .linea-pedido:last-of-type { border-bottom: none; }
+.linea-pedido--error {
+  border-left: 3px solid var(--color-danger);
+  padding-left: var(--space-sm);
+}
+
+.linea-error-msg {
+  display: block;
+  margin-bottom: var(--space-xs);
+}
 
 .linea-pedido__campos {
   display: flex;
   gap: var(--space-md);
-  flex-wrap: wrap;
+  flex-wrap: wrap;         /* en pantallas chicas los campos bajan */
   align-items: flex-end;
+  min-width: 0;
 }
 
 .linea-pedido__actions {
@@ -196,12 +256,14 @@
   align-items: center;
   justify-content: flex-end;
   gap: var(--space-md);
+  flex-wrap: wrap;
 }
 
 .linea-subtotal {
   font-size: var(--font-size-sm);
   font-weight: 700;
   color: var(--color-text-secondary);
+  white-space: nowrap;
 }
 
 .pedido-total-bar {
@@ -214,17 +276,22 @@
   font-size: var(--font-size-base);
   font-weight: 600;
   color: var(--color-text-secondary);
+  flex-wrap: wrap;
+  gap: var(--space-sm);
 }
 .pedido-total-bar strong {
   color: var(--color-primary);
   font-size: var(--font-size-xl);
   font-weight: 800;
+  white-space: nowrap;
 }
 
 .form-actions {
   margin-top: var(--space-xl);
   display: flex;
   justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: var(--space-sm);
 }
 
 /* ── Detalle pedido ── */
@@ -241,8 +308,16 @@
   letter-spacing: 0.4px;
 }
 
+/* Tabla con scroll horizontal en pantallas chicas */
+.detalle-tabla-wrapper {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
 .detalle-tabla {
   width: 100%;
+  min-width: 520px;        /* evita que las columnas se aplasten */
   border-collapse: collapse;
   margin: var(--space-md) 0;
   font-size: var(--font-size-sm);
@@ -257,15 +332,15 @@
   text-transform: uppercase;
   font-size: 11px;
   letter-spacing: 0.5px;
+  white-space: nowrap;
 }
 .detalle-tabla td {
   padding: 10px var(--space-md);
   border-bottom: 1px solid var(--color-border);
   color: var(--color-text);
+  word-break: break-word;
 }
-.detalle-tabla tbody tr:hover {
-  background: var(--color-surface-alt);
-}
+.detalle-tabla tbody tr:hover { background: var(--color-surface-alt); }
 .detalle-tabla tfoot td {
   padding-top: var(--space-md);
   border-bottom: none;
@@ -279,4 +354,48 @@
   margin-top: var(--space-lg);
   padding-top: var(--space-lg);
   border-top: 1px solid var(--color-border);
+  flex-wrap: wrap;
+}
+
+/* ── Responsive ── */
+@media (max-width: 600px) {
+  .pedido-row {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .pedido-row__right {
+    width: 100%;
+    justify-content: flex-start;
+  }
+
+  .pedido-total {
+    min-width: unset;
+    text-align: left;
+  }
+
+  .pedido-cliente {
+    max-width: 100%;
+  }
+
+  .form-row-group {
+    flex-direction: column;
+  }
+
+  .linea-pedido__campos {
+    flex-direction: column;
+  }
+
+  .linea-pedido__campos .form-row {
+    min-width: unset;
+    width: 100%;
+  }
+
+  .form-actions {
+    justify-content: stretch;
+  }
+  .form-actions .btn {
+    width: 100%;
+    justify-content: center;
+  }
 }

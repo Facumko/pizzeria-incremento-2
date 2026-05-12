@@ -1,5 +1,5 @@
 // LoginPage.jsx — CU-09 (Autenticar usuario)
-// Rol seleccionable (Mostrador / Cocinero / Dueño), contraseña con contador.
+// Rol seleccionable (Mostrador / Cocinero / Dueño), contraseña limitada sin contador visible.
 
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -24,18 +24,18 @@ const LoginPage = () => {
   const { loginUser, errorLogin, setErrorLogin } = useAuth();
   const navigate = useNavigate();
 
-  const [rol,       setRol]       = useState("");
+  const [rol,        setRol]        = useState("");
   const [contrasena, setContrasena] = useState("");
-  const [loading,   setLoading]   = useState(false);
-  const [errores,   setErrores]   = useState({ rol: "", contrasena: "" });
-  const [touched,   setTouched]   = useState({ rol: false, contrasena: false });
+  const [loading,    setLoading]    = useState(false);
+  const [errores,    setErrores]    = useState({ rol: "", contrasena: "" });
+  const [touched,    setTouched]    = useState({ rol: false, contrasena: false });
 
   const validarCampo = (nombre, valor) => {
     if (nombre === "rol") {
       if (!valor) return "Seleccioná un rol.";
     }
     if (nombre === "contrasena") {
-      if (!valor)          return "La contraseña es obligatoria.";
+      if (!valor)           return "La contraseña es obligatoria.";
       if (valor.length < 4) return "Mínimo 4 caracteres.";
     }
     return "";
@@ -64,13 +64,12 @@ const LoginPage = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setTouched({ rol: true, contrasena: true });
-    const errR = validarCampo("rol",       rol);
+    const errR = validarCampo("rol",        rol);
     const errC = validarCampo("contrasena", contrasena);
     setErrores({ rol: errR, contrasena: errC });
     if (errR || errC) return;
 
     setLoading(true);
-    // loginUser recibe el rol como "usuario" — AuthContext lo maneja
     const ok = await loginUser(rol, contrasena);
     setLoading(false);
 
@@ -84,21 +83,15 @@ const LoginPage = () => {
     }
   };
 
-  const charsRestantes = MAX_PASSWORD - contrasena.length;
-  const contadorColor  =
-    charsRestantes <= 20  ? "var(--color-danger)"  :
-    charsRestantes <= 50  ? "var(--color-pendiente)" :
-    "var(--color-text-muted)";
-
   return (
     <div className="login-page">
       <div className="login-card">
         <div className="login-card__header">
           <div className="login-card__logo-container">
-            <img 
-              src="/logo-pizza.png" 
-              alt="Logo Pizzería" 
-              className="login-card__logo-img" 
+            <img
+              src="/logo-pizza.png"
+              alt="Logo Pizzería"
+              className="login-card__logo-img"
             />
           </div>
           <h1 className="login-card__title">Pizzería</h1>
@@ -150,14 +143,6 @@ const LoginPage = () => {
               autoComplete="current-password"
               maxLength={MAX_PASSWORD}
             />
-            {/* Contador de caracteres */}
-            <div className="login-char-counter">
-              <span style={{ color: contadorColor, fontWeight: charsRestantes <= 20 ? 700 : 400 }}>
-                {contrasena.length > 0
-                  ? `${contrasena.length} / ${MAX_PASSWORD} caracteres`
-                  : `Máx. ${MAX_PASSWORD} caracteres`}
-              </span>
-            </div>
             {errores.contrasena && touched.contrasena && (
               <span className="login-field-error">{errores.contrasena}</span>
             )}
@@ -167,8 +152,7 @@ const LoginPage = () => {
             {loading ? "Ingresando..." : "Ingresar"}
           </button>
 
-          <p className="login-hint">
-            </p>
+          <p className="login-hint"></p>
         </form>
       </div>
     </div>
