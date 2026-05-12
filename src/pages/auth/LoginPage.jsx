@@ -1,6 +1,3 @@
-// LoginPage.jsx — CU-09 (Autenticar usuario)
-// Rol seleccionable (Mostrador / Cocinero / Dueño), contraseña limitada sin contador visible.
-
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
@@ -70,16 +67,11 @@ const LoginPage = () => {
     if (errR || errC) return;
 
     setLoading(true);
-    const ok = await loginUser(rol, contrasena);
+    const rolObtenido = await loginUser(rol, contrasena);
     setLoading(false);
 
-    if (ok) {
-      try {
-        const sesion = JSON.parse(localStorage.getItem("pizzeria_sesion"));
-        navigate(rutaInicial(sesion?.rol), { replace: true });
-      } catch {
-        navigate("/pedidos", { replace: true });
-      }
+    if (rolObtenido) {
+      navigate(rutaInicial(rolObtenido), { replace: true });
     }
   };
 
@@ -105,7 +97,7 @@ const LoginPage = () => {
             </div>
           )}
 
-          {/* ── Selector de rol ── */}
+          {/* Selector de rol */}
           <div className="login-field">
             <label className="login-label" htmlFor="rol">Rol</label>
             <div className="login-select-wrapper">
@@ -129,7 +121,7 @@ const LoginPage = () => {
             )}
           </div>
 
-          {/* ── Contraseña ── */}
+          {/* Contraseña */}
           <div className="login-field">
             <label className="login-label" htmlFor="contrasena">Contraseña</label>
             <input
