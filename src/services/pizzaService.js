@@ -1,4 +1,4 @@
-// pizzaService.js — Facu — INC-01
+// pizzaService.js
 // FASE 1: datos mockeados en memoria.
 // FASE 2: reemplazar el cuerpo de cada función con fetch() al endpoint REST.
 //

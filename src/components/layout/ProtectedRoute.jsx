@@ -1,4 +1,3 @@
-// ProtectedRoute.jsx — Facu — INC-01
 // Wrapper que protege rutas según rol del usuario autenticado.
 // Props: roles (array de strings) — ej: ["Mostrador", "Dueno"]
 

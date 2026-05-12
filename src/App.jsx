@@ -1,22 +1,12 @@
-// App.jsx — Integración COMPLETA (Facu + Maru)
 // INC-01: Login, Menú, Pedidos, Cocina
-//
-// INSTRUCCIONES PARA INTEGRAR:
-// 1. Reemplazar el App.jsx de Maru con este archivo.
-// 2. Asegurarse de que AuthContext.jsx está en src/context/
-// 3. Verificar que todos los imports de páginas de Maru coincidan con su estructura.
 
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { useAuth, AuthProvider } from "./context/AuthContext";
 import ProtectedRoute from "./components/layout/ProtectedRoute";
 import Sidebar from "./components/layout/Sidebar";
-
-// ── Facu ──────────────────────────────────────────────────────
 import LoginPage   from "./pages/auth/LoginPage";
 import MenuPage    from "./pages/menu/MenuPage";
 import PizzaForm   from "./pages/menu/PizzaForm";
-
-// ── Maru ──────────────────────────────────────────────────────
 import PedidosPage  from "./pages/pedidos/PedidosPage";
 import NuevoPedido  from "./pages/pedidos/NuevoPedido";
 import EditarPedido from "./pages/pedidos/EditarPedido";
@@ -56,7 +46,7 @@ const AppRoutes = () => {
         }
       />
 
-      {/* ── Menú — Facu ── */}
+      {/* Menú */}
       <Route
         path="/menu"
         element={
@@ -82,7 +72,7 @@ const AppRoutes = () => {
         }
       />
 
-      {/* ── Pedidos — Maru ── */}
+      {/*Pedidos*/}
       <Route
         path="/pedidos"
         element={
@@ -116,7 +106,7 @@ const AppRoutes = () => {
         }
       />
 
-      {/* ── Cocina — Maru ── */}
+      {/*Cocina*/}
       <Route
         path="/cocina"
         element={

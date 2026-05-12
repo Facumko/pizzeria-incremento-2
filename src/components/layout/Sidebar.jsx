@@ -1,4 +1,3 @@
-// Sidebar.jsx — Facu — INC-01
 // Navegación lateral. Muestra links según el rol del usuario autenticado.
 
 import { NavLink, useNavigate } from "react-router-dom";
@@ -40,12 +39,23 @@ const Sidebar = () => {
   return (
     <aside className="sidebar">
       <div className="sidebar__brand">
-        <div className="sidebar__brand-title">🍕 Pizzería</div>
-        <div className="sidebar__brand-sub">Sistema de gestión</div>
+        {/* Nuevo contenedor para el logo PNG */}
+        <div className="sidebar__logo-container">
+          <img 
+            src="/logo-pizza.png" 
+            alt="Logo" 
+            className="sidebar__logo-img" 
+          />
+        </div>
+        
+        {/* Agrupamos los títulos para alinearlos al lado del logo */}
+        <div className="sidebar__brand-info">
+          <div className="sidebar__brand-title">Pizzería</div>
+          <div className="sidebar__brand-sub">Sistema de gestión</div>
+        </div>
       </div>
 
       <nav className="sidebar__nav">
-        <span className="sidebar__section-label">Módulos</span>
         {links.map((link) => (
           <NavLink
             key={link.to}
