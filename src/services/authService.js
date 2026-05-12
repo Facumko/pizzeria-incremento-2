@@ -3,7 +3,7 @@
 // Mapa roles backend → frontend
 const ROL_MAP = {
   MANAGER: "Mostrador",
-  COOK:    "Cocina",
+  COOKEER:    "Cocina",
   OWNER:   "Dueño",
 };
 
