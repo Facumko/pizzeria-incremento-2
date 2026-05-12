@@ -6,8 +6,6 @@ module.exports = function (app) {
     createProxyMiddleware({
       target: "http://172.16.80.224:8080",
       changeOrigin: true,
-      logLevel: "debug",
-      pathRewrite: (path) => "/auth" + path, // /login → /auth/login
     })
   );
 };

@@ -1,4 +1,3 @@
-// AuthContext.jsx — CU-09 (Autenticación)
 import { createContext, useContext, useState, useEffect } from "react";
 import { loginUser as loginUserBackend, logoutUser as logoutUserBackend } from "../services/authService";
 
@@ -28,11 +27,11 @@ export const AuthProvider = ({ children }) => {
 
     if (!username) {
       setErrorLogin("Seleccioná un rol.");
-      return false;
+      return null;
     }
     if (!password) {
       setErrorLogin("Ingresá la contraseña.");
-      return false;
+      return null;
     }
 
     const resultado = await loginUserBackend(username, password);
@@ -43,10 +42,10 @@ export const AuthProvider = ({ children }) => {
         rol: resultado.data.role,
       };
       setUsuario(datosUsuario);
-      return true;
+      return datosUsuario.rol; // retorna el rol mapeado directamente
     } else {
       setErrorLogin(resultado.message);
-      return false;
+      return null;
     }
   };
 
