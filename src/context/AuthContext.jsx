@@ -1,7 +1,4 @@
 // AuthContext.jsx — CU-09 (Autenticación)
-// FASE 2: Integración con backend (https://superadditional-septariate-olevia.ngrok-free.dev)
-// El login usa POST /auth/login y maneja JSESSIONID automáticamente
-
 import { createContext, useContext, useState, useEffect } from "react";
 import { loginUser as loginUserBackend, logoutUser as logoutUserBackend } from "../services/authService";
 
@@ -26,9 +23,6 @@ export const AuthProvider = ({ children }) => {
     }
   }, [usuario]);
 
-  // Llamada a backend: POST /auth/login
-  // username: el rol elegido (Mostrador, Cocina, Dueño)
-  // password: la contraseña del usuario
   const loginUser = async (username, password) => {
     setErrorLogin("");
 
@@ -44,7 +38,6 @@ export const AuthProvider = ({ children }) => {
     const resultado = await loginUserBackend(username, password);
 
     if (resultado.success) {
-      // Guardar datos de la sesión
       const datosUsuario = {
         usuario: resultado.data.username,
         rol: resultado.data.role,
@@ -58,10 +51,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   const logoutUser = async () => {
-    // Llamar al backend para invalidar sesión
     await logoutUserBackend();
-    
-    // Limpiar datos locales
     setUsuario(null);
     setErrorLogin("");
   };
