@@ -6,16 +6,16 @@ import "./Layout.css";
 
 // Links por rol
 const LINKS_MOSTRADOR = [
-  { to: "/pedidos", icon: "📋", label: "Pedidos" },
-  { to: "/menu",    icon: "🍕", label: "Menú" },
+  { to: "/pedidos", label: "Pedidos" },
+  { to: "/menu", label: "Menú" },
 ];
 
-const LINKS_COCINA = [
-  { to: "/cocina", icon: "👨‍🍳", label: "Cocina" },
+const LINKS_COCINERO = [
+  { to: "/cocina", label: "Cocina" },
 ];
 
 const LINKS_DUEÑO = [
-  { to: "/menu",   icon: "🍕", label: "Menú" },
+  { to: "/menu", label: "Menú" },
 ];
 
 const getLinksByRol = (rol) => {
@@ -48,10 +48,8 @@ const Sidebar = () => {
           />
         </div>
         
-        {/* Agrupamos los títulos para alinearlos al lado del logo */}
         <div className="sidebar__brand-info">
           <div className="sidebar__brand-title">Pizzería</div>
-          <div className="sidebar__brand-sub">Sistema de gestión</div>
         </div>
       </div>
 
@@ -64,7 +62,6 @@ const Sidebar = () => {
               `sidebar__link ${isActive ? "sidebar__link--active" : ""}`
             }
           >
-            <span className="sidebar__link-icon">{link.icon}</span>
             {link.label}
           </NavLink>
         ))}
@@ -76,7 +73,7 @@ const Sidebar = () => {
           <span className="sidebar__user-rol">{usuario?.rol}</span>
         </div>
         <button className="sidebar__logout" onClick={handleLogout}>
-          ↩ Cerrar sesión
+          <span>↩</span> Cerrar sesión
         </button>
       </div>
     </aside>

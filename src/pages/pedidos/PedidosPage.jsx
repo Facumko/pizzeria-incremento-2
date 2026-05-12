@@ -1,6 +1,4 @@
 // PedidosPage.jsx — CU-08
-// Listado de pedidos con filtro por estado. Acceso: Empleado de Mostrador.
-
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { getPedidos, calcularTotal } from "../../services/pedidoService";
@@ -25,7 +23,9 @@ const PedidosPage = () => {
     }
   };
 
-  useEffect(() => { cargar(); }, [filtro]);
+  useEffect(() => {
+    cargar();
+  }, [filtro]);
 
   return (
     <div className="page-container">
@@ -65,7 +65,7 @@ const PedidosPage = () => {
               <div className="pedido-row__left">
                 <span className="pedido-nro">#{p.nroPedido}</span>
                 <div>
-                  <p className="pedido-cliente">{p.cliente || <em>Sin nombre</em>}</p>
+                  <p className="pedido-cliente">{p.cliente || <em>Mario Quinteros</em>}</p>
                   <p className="pedido-meta">
                     {p.fecha} · Entrega: {p.horaEntrega} · Demora: {p.demoraEstimada}
                   </p>
@@ -74,12 +74,15 @@ const PedidosPage = () => {
                   </p>
                 </div>
               </div>
+
               <div className="pedido-row__right">
                 <Badge text={p.estado} color={p.estado.toLowerCase()} />
+                
                 <span className="pedido-total">
                   ${calcularTotal(p.lineas).toLocaleString("es-AR")}
                 </span>
-                {p.estado === "Pendiente" && (
+
+                {p.estado === "Pendiente" ? (
                   <button
                     className="btn btn--ghost btn--sm"
                     onClick={(e) => {
@@ -87,8 +90,9 @@ const PedidosPage = () => {
                       navigate(`/pedidos/editar/${p.id}`);
                     }}
                   >
-                    Editar
-                  </button>
+                    Editar</button>
+                ) : (
+                  <div className="pedido-row__spacer" />
                 )}
               </div>
             </div>
