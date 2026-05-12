@@ -63,7 +63,7 @@ const MenuPage = () => {
   return (
     <div className="page-container">
       <div className="page-header">
-        <h1 className="page-title">MENÚ</h1>
+        <h1 className="page-title">Menú</h1>
         {esDueño && (
           <button
             className="btn btn--primary"
