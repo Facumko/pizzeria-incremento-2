@@ -1,16 +1,6 @@
 // AuthContext.jsx — CU-09 (Autenticación)
-// FASE 1: usuarios hardcodeados en memoria.
-// El login ahora usa `rol` como identificador en vez de nombre de usuario.
-// FASE 2: reemplazar loginUser() con fetch() a /api/auth/login
-
 import { createContext, useContext, useState, useEffect } from "react";
-
-// Un usuario por rol — Fase 1
-const USUARIOS_MOCK = [
-  { id: 1, usuario: "mostrador", contrasena: "1234", rol: "Mostrador"},
-  { id: 2, usuario: "cocina",    contrasena: "1234", rol: "Cocinero"},
-  { id: 3, usuario: "dueño",     contrasena: "1234", rol: "Dueño"},
-];
+import { loginUser as loginUserBackend, logoutUser as logoutUserBackend } from "../services/authService";
 
 const AuthContext = createContext(null);
 
@@ -33,35 +23,35 @@ export const AuthProvider = ({ children }) => {
     }
   }, [usuario]);
 
-  // FASE 2: reemplazar cuerpo por fetch a /api/auth/login
-  // El payload cambia: { rol, contrasena } en vez de { usuario, contrasena }
-  const loginUser = async (rol, contrasena) => {
+  const loginUser = async (username, password) => {
     setErrorLogin("");
 
-    if (!rol) {
+    if (!username) {
       setErrorLogin("Seleccioná un rol.");
       return false;
     }
-    if (!contrasena) {
+    if (!password) {
       setErrorLogin("Ingresá la contraseña.");
       return false;
     }
 
-    const encontrado = USUARIOS_MOCK.find(
-      (x) => x.rol === rol && x.contrasena === contrasena
-    );
+    const resultado = await loginUserBackend(username, password);
 
-    if (!encontrado) {
-      setErrorLogin("Contraseña incorrecta.");
+    if (resultado.success) {
+      const datosUsuario = {
+        usuario: resultado.data.username,
+        rol: resultado.data.role,
+      };
+      setUsuario(datosUsuario);
+      return true;
+    } else {
+      setErrorLogin(resultado.message);
       return false;
     }
-
-    const { contrasena: _, ...datos } = encontrado;
-    setUsuario(datos);
-    return true;
   };
 
-  const logoutUser = () => {
+  const logoutUser = async () => {
+    await logoutUserBackend();
     setUsuario(null);
     setErrorLogin("");
   };

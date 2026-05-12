@@ -44,7 +44,7 @@ const DetallePedido = () => {
       <div className="card">
         <p className="detalle-campo">
           <span className="detalle-label">Cliente:</span>
-          {pedido.cliente || <em style={{ color: "var(--color-text-muted)" }}>Sin nombre</em>}
+          {pedido.cliente || <em style={{ color: "var(--color-text-muted)" }}>Mario Quinteros</em>}
         </p>
 
         {/* Wrapper con scroll horizontal para pantallas chicas */}
