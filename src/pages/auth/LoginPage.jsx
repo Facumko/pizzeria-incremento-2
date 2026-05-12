@@ -75,7 +75,13 @@ const LoginPage = () => {
     <div className="login-page">
       <div className="login-card">
         <div className="login-card__header">
-          <div className="login-card__logo">🍕</div>
+          <div className="login-card__logo-container">
+            <img 
+              src="/logo-pizza.png" 
+              alt="Logo Pizzería" 
+              className="login-card__logo-img" 
+            />
+          </div>
           <h1 className="login-card__title">Pizzería</h1>
           <p className="login-card__subtitle">Sistema de gestión</p>
         </div>
