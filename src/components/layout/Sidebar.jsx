@@ -14,14 +14,14 @@ const LINKS_COCINERO = [
   { to: "/cocina", icon: "👨‍🍳", label: "Cocina" },
 ];
 
-const LINKS_DUENO = [
+const LINKS_DUEÑO = [
   { to: "/menu",   icon: "🍕", label: "Menú" },
 ];
 
 const getLinksByRol = (rol) => {
   if (rol === "Mostrador") return LINKS_MOSTRADOR;
   if (rol === "Cocinero")  return LINKS_COCINERO;
-  if (rol === "Dueno")     return LINKS_DUENO;
+  if (rol === "Dueño")     return LINKS_DUEÑO;
   return [];
 };
 

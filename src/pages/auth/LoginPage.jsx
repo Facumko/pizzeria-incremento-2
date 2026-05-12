@@ -9,14 +9,14 @@ import "./Login.css";
 const ROLES = [
   { value: "Mostrador", label: "Mostrador" },
   { value: "Cocinero",  label: "Cocinero"  },
-  { value: "Dueno",     label: "Dueño"     },
+  { value: "Duenñ",     label: "Dueño"     },
 ];
 
 const MAX_PASSWORD = 30;
 
 const rutaInicial = (rol) => {
   if (rol === "Cocinero") return "/cocina";
-  if (rol === "Dueno")    return "/menu";
+  if (rol === "Dueño")    return "/menu";
   return "/pedidos";
 };
 
