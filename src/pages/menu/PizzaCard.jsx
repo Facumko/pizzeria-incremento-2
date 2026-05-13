@@ -1,61 +1,52 @@
-// Muestra los datos de una variedad. Solo el Dueño ve editar/eliminar.
+// PizzaCard.jsx — muestra una variedad agrupada con tabla de precios 3x3
 
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import Modal from "../../components/ui/Modal";
-import { getPedidos } from "../../services/pedidoService";
+import { eliminarVariedad } from "../../services/pizzaService";
 import "./Menu.css";
 
-const TAMANIOS_LABEL = { 8: "8 porciones", 10: "10 porciones", 12: "12 porciones" };
+const TIPOS    = ["PIEDRA", "PARRILLA", "MOLDE"];
+const TAMANIOS = [8, 10, 12];
+const TIPO_LABEL = { PIEDRA: "Piedra", PARRILLA: "Parrilla", MOLDE: "Molde" };
+const TAM_LABEL  = { 8: "8 p.", 10: "10 p.", 12: "12 p." };
 
-const PizzaCard = ({ pizza, onEditar, onEliminar, puedeGestionar }) => {
-  const [modalOpen, setModalOpen] = useState(false);
+// variedad: { nombre, descripcion, precios: { PIEDRA: { 8: x, ... }, ... }, ids: {...} }
+const PizzaCard = ({ variedad, todasLasPizzas, puedeGestionar, onEliminada }) => {
+  const navigate = useNavigate();
+  const [modalOpen,     setModalOpen]     = useState(false);
   const [errorEliminar, setErrorEliminar] = useState("");
+  const [eliminando,    setEliminando]    = useState(false);
 
-  const abrirModalEliminar = () => {
-    setErrorEliminar("");
-    setModalOpen(true);
-  };
-
-  // Verifica si la pizza tiene pedidos activos antes de eliminar — CU-03
   const confirmarEliminar = async () => {
+    setEliminando(true);
     try {
-      const pedidosActivos = await getPedidos("Pendiente");
-      const enUso = pedidosActivos.some((p) =>
-        p.lineas.some((l) => l.variedad === pizza.nombre)
-      );
-      if (enUso) {
-        setErrorEliminar(
-          "No es posible eliminar esta variedad porque está asociada a pedidos activos."
-        );
-        return;
-      }
+      await eliminarVariedad(variedad.nombre, todasLasPizzas);
       setModalOpen(false);
-      onEliminar(pizza.id);
-    } catch {
-      setErrorEliminar("Error al verificar pedidos activos.");
+      onEliminada(variedad.nombre);
+    } catch (e) {
+      setErrorEliminar(e.message);
+    } finally {
+      setEliminando(false);
     }
   };
-
-  const tamaniosDisponibles = Object.keys(pizza.precios).map(Number).sort((a, b) => a - b);
 
   return (
     <>
       <div className="pizza-card card">
         <div className="pizza-card__header">
-          <h3 className="pizza-card__nombre">{pizza.nombre}</h3>
+          <h3 className="pizza-card__nombre">{variedad.nombre}</h3>
           {puedeGestionar && (
             <div className="pizza-card__acciones">
               <button
                 className="btn btn--ghost btn--sm"
-                onClick={() => onEditar(pizza)}
-                title="Editar variedad"
+                onClick={() => navigate(`/menu/editar/${encodeURIComponent(variedad.nombre)}`)}
               >
                 Editar
               </button>
               <button
                 className="btn btn--danger btn--sm"
-                onClick={abrirModalEliminar}
-                title="Eliminar variedad"
+                onClick={() => { setErrorEliminar(""); setModalOpen(true); }}
               >
                 ✕
               </button>
@@ -63,23 +54,37 @@ const PizzaCard = ({ pizza, onEditar, onEliminar, puedeGestionar }) => {
           )}
         </div>
 
-        <p className="pizza-card__ingredientes">{pizza.ingredientes}</p>
+        {variedad.descripcion && (
+          <p className="pizza-card__ingredientes">{variedad.descripcion}</p>
+        )}
 
-        <div className="pizza-card__tipos">
-          {pizza.tipos.map((t) => (
-            <span key={t} className="pizza-card__tipo-tag">{t}</span>
-          ))}
-        </div>
-
-        <div className="pizza-card__precios">
-          {tamaniosDisponibles.map((tam) => (
-            <div key={tam} className="pizza-card__precio-row">
-              <span className="pizza-card__precio-label">{TAMANIOS_LABEL[tam]}</span>
-              <span className="pizza-card__precio-valor">
-                ${pizza.precios[tam].toLocaleString("es-AR")}
-              </span>
-            </div>
-          ))}
+        {/* Tabla de precios 3×3 */}
+        <div className="pizza-card__precios-tabla-wrapper">
+          <table className="pizza-card__precios-tabla">
+            <thead>
+              <tr>
+                <th></th>
+                {TAMANIOS.map((t) => <th key={t}>{TAM_LABEL[t]}</th>)}
+              </tr>
+            </thead>
+            <tbody>
+              {TIPOS.map((tipo) => (
+                <tr key={tipo}>
+                  <td className="pizza-card__precios-tipo">{TIPO_LABEL[tipo]}</td>
+                  {TAMANIOS.map((tam) => {
+                    const precio = variedad.precios?.[tipo]?.[tam];
+                    return (
+                      <td key={tam} className="pizza-card__precios-valor">
+                        {precio != null
+                          ? `$${Number(precio).toLocaleString("es-AR")}`
+                          : <span style={{ color: "var(--color-text-muted)" }}>—</span>}
+                      </td>
+                    );
+                  })}
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
       </div>
 
@@ -89,11 +94,11 @@ const PizzaCard = ({ pizza, onEditar, onEliminar, puedeGestionar }) => {
         onConfirm={confirmarEliminar}
         title="Eliminar variedad"
         danger
-        confirmLabel="Eliminar"
+        confirmLabel={eliminando ? "Eliminando..." : "Eliminar"}
         body={
           <>
             <p>
-              ¿Estás seguro de que querés eliminar <strong>{pizza.nombre}</strong>?
+              ¿Estás seguro de que querés eliminar <strong>{variedad.nombre}</strong> con todas sus combinaciones?
               Esta acción no puede deshacerse.
             </p>
             {errorEliminar && (

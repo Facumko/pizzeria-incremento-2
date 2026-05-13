@@ -1,97 +1,87 @@
-// PizzaForm.jsx — CU-01 (alta) y CU-02 (edición)
-// Ruta: /menu/nueva  y  /menu/editar/:id
-// Solo accesible para el Dueño.
+// PizzaForm.jsx — CU-01 (alta) y CU-02 (edición de variedad completa)
+// El dueño completa nombre, descripción y una grilla 3 tipos × 3 tamaños = 9 precios.
+// Al guardar se crean/actualizan las 9 combinaciones en el backend.
 
 import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { crearPizza, modificarPizza, getPizzaById } from "../../services/pizzaService";
+import {
+  getPizzas,
+  crearVariedad,
+  modificarPizza,
+  agruparPorVariedad,
+} from "../../services/pizzaService";
 import "./Menu.css";
 
-const TIPOS_COCCION    = ["piedra", "parrilla", "molde"];
-const TAMANIOS         = [8, 10, 12];
-const MAX_NOMBRE       = 50;
-const MAX_INGREDIENTES = 200;
-const MAX_PRECIO       = 999999;
-const MIN_PRECIO       = 1;
+const TIPOS    = ["PIEDRA", "PARRILLA", "MOLDE"];
+const TAMANIOS = [8, 10, 12];
 
-const estadoInicial = () => ({
-  nombre: "",
-  ingredientes: "",
-  tipos: [],
-  precios: { 8: "", 10: "", 12: "" },
-});
+const TIPO_LABEL = { PIEDRA: "A la piedra", PARRILLA: "A la parrilla", MOLDE: "De molde" };
+const TAM_LABEL  = { 8: "8 porc.", 10: "10 porc.", 12: "12 porc." };
+
+const MAX_NOMBRE      = 50;
+const MAX_DESCRIPCION = 200;
+const MAX_PRECIO      = 999999;
+
+// Grilla vacía: { PIEDRA: { 8: "", 10: "", 12: "" }, PARRILLA: {...}, MOLDE: {...} }
+const grillaVacia = () =>
+  Object.fromEntries(TIPOS.map((t) => [t, Object.fromEntries(TAMANIOS.map((s) => [s, ""]))]));
 
 const PizzaForm = () => {
-  const { id }    = useParams();
+  const { nombre: nombreParam } = useParams(); // edición: /menu/editar/:nombre
   const navigate  = useNavigate();
-  const esEdicion = Boolean(id);
+  const esEdicion = Boolean(nombreParam);
 
-  const [form,    setForm]    = useState(estadoInicial());
+  const [nombre,      setNombre]      = useState("");
+  const [descripcion, setDescripcion] = useState("");
+  const [precios,     setPrecios]     = useState(grillaVacia());
+  const [idsExistentes, setIdsExistentes] = useState({}); // { PIEDRA: { 8: id, ... } }
+
   const [error,   setError]   = useState("");
   const [saving,  setSaving]  = useState(false);
   const [loading, setLoading] = useState(esEdicion);
 
   useEffect(() => {
     if (!esEdicion) return;
-    getPizzaById(id)
-      .then((pizza) => {
-        setForm({
-          nombre:       pizza.nombre,
-          ingredientes: pizza.ingredientes,
-          tipos:        [...pizza.tipos],
-          precios: {
-            8:  pizza.precios[8]  ?? "",
-            10: pizza.precios[10] ?? "",
-            12: pizza.precios[12] ?? "",
-          },
-        });
+    getPizzas()
+      .then((lista) => {
+        const variedades = agruparPorVariedad(lista);
+        const variedad   = variedades.find((v) => v.nombre === decodeURIComponent(nombreParam));
+        if (!variedad) { setError("Variedad no encontrada."); setLoading(false); return; }
+        setNombre(variedad.nombre);
+        setDescripcion(variedad.descripcion || "");
+        // Llenar grilla con los precios existentes
+        const g = grillaVacia();
+        for (const tipo of TIPOS) {
+          for (const tam of TAMANIOS) {
+            g[tipo][tam] = variedad.precios?.[tipo]?.[tam] ?? "";
+          }
+        }
+        setPrecios(g);
+        setIdsExistentes(variedad.ids || {});
         setLoading(false);
       })
       .catch((e) => { setError(e.message); setLoading(false); });
-  }, [id, esEdicion]);
+  }, [nombreParam, esEdicion]);
 
-  const toggleTipo = (tipo) => {
-    setForm((prev) => ({
-      ...prev,
-      tipos: prev.tipos.includes(tipo)
-        ? prev.tipos.filter((t) => t !== tipo)
-        : [...prev.tipos, tipo],
-    }));
-  };
-
-  const setPrecio = (tam, valor) => {
+  const setPrecio = (tipo, tam, valor) => {
     const limpio = valor.replace(/\D/g, "");
-    if (limpio === "") {
-      setForm((prev) => ({ ...prev, precios: { ...prev.precios, [tam]: "" } }));
-      return;
-    }
-    const n = Math.min(Number(limpio), MAX_PRECIO);
-    setForm((prev) => ({ ...prev, precios: { ...prev.precios, [tam]: String(n) } }));
+    const n = limpio === "" ? "" : String(Math.min(Number(limpio), MAX_PRECIO));
+    setPrecios((prev) => ({ ...prev, [tipo]: { ...prev[tipo], [tam]: n } }));
   };
 
   const validar = () => {
-    if (!form.nombre.trim())
-      return "El nombre de la variedad es obligatorio.";
-    if (form.nombre.trim().length > MAX_NOMBRE)
-      return `El nombre no puede superar los ${MAX_NOMBRE} caracteres.`;
-    if (!form.ingredientes.trim())
-      return "Los ingredientes son obligatorios.";
-    if (form.ingredientes.trim().length > MAX_INGREDIENTES)
-      return `Los ingredientes no pueden superar los ${MAX_INGREDIENTES} caracteres.`;
-    if (form.tipos.length === 0)
-      return "Seleccioná al menos un tipo de cocción.";
-
-    for (const t of TAMANIOS) {
-      const val = form.precios[t];
-      if (val === "" || val === undefined)
-        return `El precio para ${t} porciones es obligatorio.`;
-      const num = Number(val);
-      if (isNaN(num) || num < MIN_PRECIO)
-        return `El precio para ${t} porciones debe ser mayor a $0.`;
-      if (num > MAX_PRECIO)
-        return `El precio para ${t} porciones no puede superar $${MAX_PRECIO.toLocaleString("es-AR")}.`;
+    if (!nombre.trim())      return "El nombre de la variedad es obligatorio.";
+    if (!descripcion.trim()) return "La descripción es obligatoria.";
+    for (const tipo of TIPOS) {
+      for (const tam of TAMANIOS) {
+        const val = precios[tipo][tam];
+        if (val === "" || val === undefined)
+          return `Falta el precio: ${TIPO_LABEL[tipo]} — ${TAM_LABEL[tam]}.`;
+        const n = Number(val);
+        if (isNaN(n) || n < 1)
+          return `El precio de ${TIPO_LABEL[tipo]} ${TAM_LABEL[tam]} debe ser mayor a $0.`;
+      }
     }
-
     return "";
   };
 
@@ -101,19 +91,30 @@ const PizzaForm = () => {
     setError("");
     setSaving(true);
 
-    const preciosLimpios = {};
-    TAMANIOS.forEach((t) => { preciosLimpios[t] = Number(form.precios[t]); });
-
-    const payload = {
-      nombre:       form.nombre.trim(),
-      ingredientes: form.ingredientes.trim(),
-      tipos:        form.tipos,
-      precios:      preciosLimpios,
-    };
-
     try {
-      if (esEdicion) { await modificarPizza(id, payload); }
-      else           { await crearPizza(payload); }
+      if (!esEdicion) {
+        // Alta: crear las 9 combinaciones
+        await crearVariedad({ nombre: nombre.trim(), descripcion: descripcion.trim(), precios });
+      } else {
+        // Edición: PUT a cada una de las 9 combinaciones existentes
+        const promises = [];
+        for (const tipo of TIPOS) {
+          for (const tam of TAMANIOS) {
+            const id = idsExistentes?.[tipo]?.[tam];
+            if (!id) continue; // combinación que no existía (no debería pasar)
+            promises.push(
+              modificarPizza(id, {
+                nombre: nombre.trim(),
+                descripcion: descripcion.trim(),
+                tipoCoccion: tipo,
+                tamanio: tam,
+                precio: Number(precios[tipo][tam]),
+              })
+            );
+          }
+        }
+        await Promise.all(promises);
+      }
       navigate("/menu");
     } catch (e) {
       setError(e.message);
@@ -127,105 +128,101 @@ const PizzaForm = () => {
   return (
     <div className="page-container">
       <div className="page-header">
-        <h1 className="page-title">
-          {esEdicion ? "Modificar variedad" : "Nueva variedad"}
-        </h1>
-        <button className="btn btn--secondary" onClick={() => navigate("/menu")}>
-          Cancelar
-        </button>
+        <h1 className="page-title">{esEdicion ? "Modificar variedad" : "Nueva variedad"}</h1>
+        <button className="btn btn--secondary" onClick={() => navigate("/menu")}>Cancelar</button>
       </div>
 
       {error && <div className="alert-error">{error}</div>}
 
       <div className="pizza-form card">
+
         {/* ── Datos básicos ── */}
         <div className="pizza-form__section">
           <p className="pizza-form__section-title">Datos de la variedad</p>
 
           <div className="pizza-form__row">
             <label className="pizza-form__label">
-              Nombre *{" "}
-              <span style={{ fontWeight: 400, color: "var(--color-text-muted)", textTransform: "none" }}>
-                (máx. {MAX_NOMBRE} caracteres)
-              </span>
+              Nombre * <span style={{ fontWeight: 400, color: "var(--color-text-muted)", textTransform: "none" }}>(máx. {MAX_NOMBRE} car.)</span>
             </label>
             <input
               className="pizza-form__input"
               type="text"
-              value={form.nombre}
-              onChange={(e) => setForm({ ...form, nombre: e.target.value })}
+              value={nombre}
+              onChange={(e) => setNombre(e.target.value)}
               placeholder="Ej: Napolitana"
               maxLength={MAX_NOMBRE}
+              disabled={esEdicion} // no se puede cambiar el nombre en edición (es la clave)
             />
-            <span style={{
-              fontSize: 11, textAlign: "right",
-              color: form.nombre.length >= MAX_NOMBRE - 5 ? "var(--color-danger)" : "var(--color-text-muted)"
-            }}>
-              {form.nombre.length} / {MAX_NOMBRE}
-            </span>
+            {esEdicion && (
+              <span style={{ fontSize: 11, color: "var(--color-text-muted)" }}>
+                El nombre no se puede cambiar en edición.
+              </span>
+            )}
+            {!esEdicion && (
+              <span style={{ fontSize: 11, textAlign: "right", color: nombre.length >= MAX_NOMBRE - 5 ? "var(--color-danger)" : "var(--color-text-muted)" }}>
+                {nombre.length} / {MAX_NOMBRE}
+              </span>
+            )}
           </div>
 
           <div className="pizza-form__row">
             <label className="pizza-form__label">
-              Ingredientes *{" "}
-              <span style={{ fontWeight: 400, color: "var(--color-text-muted)", textTransform: "none" }}>
-                (máx. {MAX_INGREDIENTES} caracteres)
-              </span>
+              Descripción * <span style={{ fontWeight: 400, color: "var(--color-text-muted)", textTransform: "none" }}>(máx. {MAX_DESCRIPCION} car.)</span>
             </label>
             <input
               className="pizza-form__input"
               type="text"
-              value={form.ingredientes}
-              onChange={(e) => setForm({ ...form, ingredientes: e.target.value })}
+              value={descripcion}
+              onChange={(e) => setDescripcion(e.target.value)}
               placeholder="Ej: Tomate, mozzarella, aceitunas"
-              maxLength={MAX_INGREDIENTES}
+              maxLength={MAX_DESCRIPCION}
             />
-            <span style={{
-              fontSize: 11, textAlign: "right",
-              color: form.ingredientes.length >= MAX_INGREDIENTES - 20 ? "var(--color-danger)" : "var(--color-text-muted)"
-            }}>
-              {form.ingredientes.length} / {MAX_INGREDIENTES}
+            <span style={{ fontSize: 11, textAlign: "right", color: descripcion.length >= MAX_DESCRIPCION - 20 ? "var(--color-danger)" : "var(--color-text-muted)" }}>
+              {descripcion.length} / {MAX_DESCRIPCION}
             </span>
           </div>
         </div>
 
-        {/* ── Tipos de cocción ── */}
+        {/* ── Grilla de precios ── */}
         <div className="pizza-form__section">
-          <p className="pizza-form__section-title">Tipos de cocción *</p>
-          <div className="pizza-form__tipos">
-            {TIPOS_COCCION.map((tipo) => (
-              <label key={tipo} className="pizza-form__tipo-check">
-                <input
-                  type="checkbox"
-                  checked={form.tipos.includes(tipo)}
-                  onChange={() => toggleTipo(tipo)}
-                />
-                {tipo}
-              </label>
-            ))}
-          </div>
-        </div>
-
-        {/* ── Precios — todos obligatorios ── */}
-        <div className="pizza-form__section">
-          <p className="pizza-form__section-title">Tamaños y precios *</p>
-          <p style={{ fontSize: 12, color: "var(--color-text-muted)", marginBottom: 12 }}>
-            Los tres tamaños son obligatorios. Máximo ${MAX_PRECIO.toLocaleString("es-AR")} por tamaño.
+          <p className="pizza-form__section-title">Precios por tipo y tamaño *</p>
+          <p style={{ fontSize: 12, color: "var(--color-text-muted)", marginBottom: 16 }}>
+            Todos los campos son obligatorios. Máximo ${MAX_PRECIO.toLocaleString("es-AR")} por combinación.
           </p>
-          <div className="pizza-form__precios">
-            {TAMANIOS.map((tam) => (
-              <div key={tam} className="pizza-form__precio-row">
-                <span className="pizza-form__precio-label">{tam} porciones *</span>
-                <input
-                  className="pizza-form__precio-input"
-                  type="text"
-                  inputMode="numeric"
-                  placeholder="Obligatorio"
-                  value={form.precios[tam]}
-                  onChange={(e) => setPrecio(tam, e.target.value)}
-                />
-              </div>
-            ))}
+
+          <div className="pizza-form__grilla-wrapper">
+            <table className="pizza-form__grilla">
+              <thead>
+                <tr>
+                  <th></th>
+                  {TAMANIOS.map((t) => (
+                    <th key={t}>{TAM_LABEL[t]}</th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {TIPOS.map((tipo) => (
+                  <tr key={tipo}>
+                    <td className="pizza-form__grilla-label">{TIPO_LABEL[tipo]}</td>
+                    {TAMANIOS.map((tam) => (
+                      <td key={tam}>
+                        <div className="pizza-form__grilla-cell">
+                          <span className="pizza-form__grilla-prefix">$</span>
+                          <input
+                            className="pizza-form__grilla-input"
+                            type="text"
+                            inputMode="numeric"
+                            placeholder="0"
+                            value={precios[tipo][tam]}
+                            onChange={(e) => setPrecio(tipo, tam, e.target.value)}
+                          />
+                        </div>
+                      </td>
+                    ))}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
         </div>
 
