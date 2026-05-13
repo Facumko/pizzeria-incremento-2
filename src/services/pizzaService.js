@@ -33,7 +33,7 @@ export const getPizzas = async () => {
   return handleResponse(res);
 };
 
-// GET /api/pizzas/:id
+// GET pizza por id agrupado (busca en la lista completa)
 export const getPizzaById = async (id) => {
   const res = await fetch(`${BASE}/${id}`, { credentials: "include" });
   return handleResponse(res);
@@ -55,7 +55,7 @@ export const crearPizza = async (data) => {
 // Devuelve array de resultados o lanza error si alguno falla
 export const crearVariedad = async ({ nombre, descripcion, precios }) => {
   // precios: { PIEDRA: { 8: x, 10: x, 12: x }, PARRILLA: {...}, MOLDE: {...} }
-  const TIPOS   = ["PIEDRA", "PARRILLA", "MOLDE"];
+  const TIPOS    = ["PIEDRA", "PARRILLA", "MOLDE"];
   const TAMANIOS = [8, 10, 12];
 
   const combinaciones = [];
