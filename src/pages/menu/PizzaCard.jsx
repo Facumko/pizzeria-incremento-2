@@ -1,8 +1,5 @@
-// Muestra los datos de una variedad. Solo el Dueño ve editar/eliminar.
-
 import { useState } from "react";
 import Modal from "../../components/ui/Modal";
-import { getPedidos } from "../../services/pedidoService";
 import "./Menu.css";
 
 const TAMANIOS_LABEL = { 8: "8 porciones", 10: "10 porciones", 12: "12 porciones" };
@@ -16,27 +13,20 @@ const PizzaCard = ({ pizza, onEditar, onEliminar, puedeGestionar }) => {
     setModalOpen(true);
   };
 
-  // Verifica si la pizza tiene pedidos activos antes de eliminar — CU-03
   const confirmarEliminar = async () => {
-    try {
-      const pedidosActivos = await getPedidos("Pendiente");
-      const enUso = pedidosActivos.some((p) =>
-        p.lineas.some((l) => l.variedad === pizza.nombre)
-      );
-      if (enUso) {
-        setErrorEliminar(
-          "No es posible eliminar esta variedad porque está asociada a pedidos activos."
-        );
-        return;
-      }
-      setModalOpen(false);
-      onEliminar(pizza.id);
-    } catch {
-      setErrorEliminar("Error al verificar pedidos activos.");
-    }
+    setModalOpen(false);
+    onEliminar(pizza);
   };
 
-  const tamaniosDisponibles = Object.keys(pizza.precios).map(Number).sort((a, b) => a - b);
+  // Construye filas: tipo → tamaños con precio
+  const filas = [];
+  for (const tipo of pizza.tipos) {
+    const preciosPorTam = pizza.precios[tipo] ?? {};
+    for (const [tam, precio] of Object.entries(preciosPorTam)) {
+      filas.push({ tipo, tamanio: Number(tam), precio });
+    }
+  }
+  filas.sort((a, b) => a.tamanio - b.tamanio);
 
   return (
     <>
@@ -72,11 +62,13 @@ const PizzaCard = ({ pizza, onEditar, onEliminar, puedeGestionar }) => {
         </div>
 
         <div className="pizza-card__precios">
-          {tamaniosDisponibles.map((tam) => (
-            <div key={tam} className="pizza-card__precio-row">
-              <span className="pizza-card__precio-label">{TAMANIOS_LABEL[tam]}</span>
+          {filas.map((f, i) => (
+            <div key={i} className="pizza-card__precio-row">
+              <span className="pizza-card__precio-label">
+                {f.tipo} — {TAMANIOS_LABEL[f.tamanio] ?? `${f.tamanio} porciones`}
+              </span>
               <span className="pizza-card__precio-valor">
-                ${pizza.precios[tam].toLocaleString("es-AR")}
+                ${f.precio.toLocaleString("es-AR")}
               </span>
             </div>
           ))}

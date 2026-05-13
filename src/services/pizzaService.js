@@ -1,95 +1,129 @@
-// pizzaService.js
-// FASE 1: datos mockeados en memoria.
-// FASE 2: reemplazar el cuerpo de cada función con fetch() al endpoint REST.
-//
-// Endpoints esperados (contrato con el equipo Java):
-//   GET    /api/pizzas         → lista todas las variedades
-//   POST   /api/pizzas         → crea nueva variedad
-//   PUT    /api/pizzas/:id     → modifica variedad existente
-//   DELETE /api/pizzas/:id     → elimina (solo si sin pedidos activos)
+const COOKING_TYPE_REVERSE = {
+  PIEDRA:   "piedra",
+  PARRILLA: "parrilla",
+  MOLDE:    "molde",
+};
 
-let pizzas = [
-  {
-    id: 1,
-    nombre: "Mozzarella",
-    ingredientes: "Tomate, mozzarella",
-    tipos: ["piedra", "parrilla", "molde"],
-    precios: { 8: 1200, 10: 1600, 12: 2000 },
-  },
-  {
-    id: 2,
-    nombre: "Napolitana",
-    ingredientes: "Tomate, mozzarella, aceitunas, anchoas",
-    tipos: ["piedra", "parrilla"],
-    precios: { 8: 1400, 10: 1800, 12: 2200 },
-  },
-  {
-    id: 3,
-    nombre: "Especial",
-    ingredientes: "Tomate, mozzarella, jamón, morrón, huevo",
-    tipos: ["molde", "piedra"],
-    precios: { 8: 1800, 10: 2200, 12: 2500 },
-  },
-];
+const SIZE_REVERSE = {
+  SMALL:  8,
+  MEDIUM: 10,
+  LARGE:  12,
+};
 
-let nextId = 4;
+const COOKING_TYPE_MAP = {
+  piedra:   "PIEDRA",
+  parrilla: "PARRILLA",
+  molde:    "MOLDE",
+};
 
-// GET /api/pizzas
+const SIZE_MAP = {
+  8:  "SMALL",
+  10: "MEDIUM",
+  12: "LARGE",
+};
+
+// Agrupa las variantes del backend en cards de frontend
+const agruparPizzas = (lista) => {
+  const mapa = {};
+  for (const p of lista) {
+    const tipo    = COOKING_TYPE_REVERSE[p.cookingType] ?? p.cookingType.toLowerCase();
+    const tamanio = SIZE_REVERSE[p.size] ?? p.size;
+
+    if (!mapa[p.name]) {
+      mapa[p.name] = {
+        nombre:      p.name,
+        ingredientes: p.description,
+        tipos:       [],
+        precios:     {},
+        variantes:   [],
+      };
+    }
+
+    const pizza = mapa[p.name];
+
+    if (!pizza.tipos.includes(tipo)) pizza.tipos.push(tipo);
+
+    if (!pizza.precios[tipo]) pizza.precios[tipo] = {};
+    pizza.precios[tipo][tamanio] = p.price;
+
+    pizza.variantes.push({ id: p.id, tipo, tamanio, precio: p.price });
+  }
+  return Object.values(mapa);
+};
+
+// GET /pizza/traer
 export const getPizzas = async () => {
-  return [...pizzas];
+  const res = await fetch("/pizza/traer", { credentials: "include" });
+  if (!res.ok) throw new Error("Error al cargar el menú");
+  const data = await res.json();
+  return agruparPizzas(data);
 };
 
-// GET /api/pizzas/:id
+// GET pizza por id agrupado (busca en la lista completa)
 export const getPizzaById = async (id) => {
-  const pizza = pizzas.find((p) => p.id === Number(id));
+  const pizzas = await getPizzas();
+  // id acá es el nombre usado como key en edición
+  const pizza = pizzas.find((p) => String(p.id) === String(id) || p.nombre === id);
   if (!pizza) throw new Error("Pizza no encontrada");
-  return { ...pizza };
+  return pizza;
 };
 
-// POST /api/pizzas — RF01
-// Valida nombre único antes de guardar
+// POST /pizza/guardar — crea UNA variante
 export const crearPizza = async (data) => {
-  const nombreDuplicado = pizzas.some(
-    (p) => p.nombre.toLowerCase() === data.nombre.trim().toLowerCase()
-  );
-  if (nombreDuplicado) {
-    throw new Error("Ya existe una variedad con ese nombre.");
+  // data.tipos y data.precios vienen del form agrupado
+  // por cada tipo × tamaño creamos una variante
+  const variantes = [];
+  for (const tipo of data.tipos) {
+    for (const [tam, precio] of Object.entries(data.precios[tipo] ?? {})) {
+      const body = {
+        name:        data.nombre,
+        description: data.ingredientes,
+        cookingType: COOKING_TYPE_MAP[tipo],
+        size:        SIZE_MAP[Number(tam)],
+        price:       precio,
+      };
+      const res = await fetch("/pizza/guardar", {
+        method:      "POST",
+        headers:     { "Content-Type": "application/json" },
+        credentials: "include",
+        body:        JSON.stringify(body),
+      });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        const msg = Object.values(err.errors ?? {}).join(", ") || "Error al crear pizza";
+        throw new Error(msg);
+      }
+      variantes.push(await res.json());
+    }
   }
-  const nueva = {
-    ...data,
-    id: nextId++,
-    nombre: data.nombre.trim(),
-  };
-  pizzas.push(nueva);
-  return { ...nueva };
+  return variantes;
 };
 
-// PUT /api/pizzas/:id — RF02
+// PUT /pizza/editar/{id} — edita una variante por id
 export const modificarPizza = async (id, data) => {
-  const idx = pizzas.findIndex((p) => p.id === Number(id));
-  if (idx === -1) throw new Error("Pizza no encontrada");
-
-  // Validar nombre único (excluyendo la propia pizza)
-  const nombreDuplicado = pizzas.some(
-    (p) =>
-      p.id !== Number(id) &&
-      p.nombre.toLowerCase() === data.nombre.trim().toLowerCase()
-  );
-  if (nombreDuplicado) {
-    throw new Error("Ya existe una variedad con ese nombre.");
-  }
-
-  pizzas[idx] = { ...pizzas[idx], ...data, nombre: data.nombre.trim() };
-  return { ...pizzas[idx] };
+  const body = {
+    name:        data.nombre,
+    description: data.ingredientes,
+    cookingType: COOKING_TYPE_MAP[data.tipo],
+    size:        SIZE_MAP[Number(data.tamanio)],
+    price:       data.precio,
+  };
+  const res = await fetch(`/pizza/editar/${id}`, {
+    method:      "PUT",
+    headers:     { "Content-Type": "application/json" },
+    credentials: "include",
+    body:        JSON.stringify(body),
+  });
+  if (!res.ok) throw new Error("Error al modificar pizza");
+  return res.json();
 };
 
-// DELETE /api/pizzas/:id — CU-03
-// En Fase 1 no tenemos acceso directo a pedidoService aquí para verificar
-// pedidos activos — esa validación la hace el componente PizzaCard antes de llamar.
-// En Fase 2, el backend retorna 409 si la pizza tiene pedidos activos.
+// DELETE /pizza/eliminar/{id}
 export const eliminarPizza = async (id) => {
-  const idx = pizzas.findIndex((p) => p.id === Number(id));
-  if (idx === -1) throw new Error("Pizza no encontrada");
-  pizzas.splice(idx, 1);
+  const res = await fetch(`/pizza/eliminar/${id}`, {
+    method:      "DELETE",
+    credentials: "include",
+  });
+  if (!res.ok) throw new Error("Error al eliminar pizza");
   return true;
 };
