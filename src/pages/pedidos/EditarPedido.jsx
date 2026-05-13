@@ -5,26 +5,30 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { getPedidoById, modificarPedido, calcularTotal } from "../../services/pedidoService";
-import { getPizzas } from "../../services/pizzaService";
+import { getPizzas, getPizzaId } from "../../services/pizzaService";
 import "./Pedidos.css";
 
 const TAMANIOS     = [8, 10, 12];
 const MAX_LINEAS   = 50;
 const MAX_CANTIDAD = 99;
 const MAX_CLIENTE  = 50;
-const MAX_DEMORA   = 999; // minutos
+const MAX_DEMORA   = 999;
 
-// Parsea "30 min" o "2 hs 30 min" → número de minutos como string
+const TIPO_LABEL = { PIEDRA: "A la piedra", PARRILLA: "A la parrilla", MOLDE: "De molde" };
+const TAM_LABEL  = { 8: "8 porciones", 10: "10 porciones", 12: "12 porciones" };
+
+// Parsea "30 min" → "30"
 const parseDemoraMin = (str = "") => {
-  // Soporta tanto "45 min" como el formato viejo "2 hs"
   const matchMin = str.match(/(\d+)\s*min/);
   const matchHs  = str.match(/(\d+)\s*hs/);
   if (matchMin) return matchMin[1];
   if (matchHs)  return String(Number(matchHs[1]) * 60);
-  // fallback: primer número
   const num = str.match(/\d+/);
   return num ? num[0] : "";
 };
+
+// Normaliza el tipo que viene del backend mapeado al formato "piedra" → "PIEDRA"
+const normalizarTipo = (tipo = "") => tipo.toUpperCase();
 
 const EditarPedido = () => {
   const { id }   = useParams();
@@ -53,14 +57,38 @@ const EditarPedido = () => {
         setCliente(pedido.cliente || "");
         setHoraEntrega(pedido.horaEntrega);
         setDemoraMin(parseDemoraMin(pedido.demoraEstimada));
-        setLineas(pedido.lineas.map((l) => ({ ...l, _key: l.id })));
+        // Las líneas del pedido ya traen pizzaId desde el mapeo del service
+        // Normalizamos el tipo a mayúsculas para que coincida con los enums del front
+        setLineas(
+          pedido.lineas.map((l) => ({
+            ...l,
+            tipo:  normalizarTipo(l.tipo),
+            _key:  l.id,
+          }))
+        );
         setPizzas(menuPizzas);
         setLoading(false);
       })
       .catch((e) => { setError(e.message); setLoading(false); });
   }, [id]);
 
-  const pizzaSeleccionada = (nombre) => pizzas.find((p) => p.nombre === nombre);
+  // Nombres únicos de variedad
+  const variedadesUnicas = [...new Set(pizzas.map((p) => p.nombre))].sort();
+
+  // Tipos disponibles para una variedad dada
+  const tiposDeVariedad = (nombreVariedad) =>
+    [...new Set(
+      pizzas
+        .filter((p) => p.nombre === nombreVariedad)
+        .map((p) => p.tipoCoccion)
+    )];
+
+  // Tamaños disponibles para una variedad + tipo dados
+  const tamaniosDeVariedad = (nombreVariedad, tipo) =>
+    pizzas
+      .filter((p) => p.nombre === nombreVariedad && p.tipoCoccion === tipo)
+      .map((p) => p.tamanio)
+      .sort((a, b) => a - b);
 
   const handleDemoraMin = (val) => {
     const limpio = val.replace(/\D/g, "");
@@ -80,15 +108,31 @@ const EditarPedido = () => {
       prev.map((l) => {
         if (l._key !== key) return l;
         const act = { ...l, [campo]: valor };
-        if (campo === "variedad") { act.tipo = ""; act.tamanio = ""; act.precioUnitario = 0; }
-        if (campo === "tipo") act.precioUnitario = 0;
-        if ((campo === "tamanio" || campo === "variedad") && act.variedad && act.tamanio) {
-          const pz = pizzaSeleccionada(act.variedad);
-          act.precioUnitario = pz?.precios?.[act.tamanio] ?? 0;
+
+        if (campo === "variedad") {
+          act.tipo           = "";
+          act.tamanio        = "";
+          act.precioUnitario = 0;
+          act.pizzaId        = null;
         }
+
+        if (campo === "tipo") {
+          act.tamanio        = "";
+          act.precioUnitario = 0;
+          act.pizzaId        = null;
+        }
+
+        if (campo === "tamanio" && act.variedad && act.tipo) {
+          const newId = getPizzaId(pizzas, act.variedad, act.tipo, Number(valor));
+          const pz    = pizzas.find((p) => p.id === newId);
+          act.pizzaId        = newId;
+          act.precioUnitario = pz?.precio ?? 0;
+        }
+
         if (campo === "cantidad") {
           act.cantidad = Math.min(Math.max(1, Number(valor) || 1), MAX_CANTIDAD);
         }
+
         return act;
       })
     );
@@ -97,7 +141,10 @@ const EditarPedido = () => {
 
   const agregarLinea = () => {
     if (lineas.length >= MAX_LINEAS) return;
-    setLineas((prev) => [...prev, { _key: Date.now(), variedad: "", tipo: "", tamanio: "", cantidad: 1, precioUnitario: 0 }]);
+    setLineas((prev) => [
+      ...prev,
+      { _key: Date.now(), variedad: "", tipo: "", tamanio: "", cantidad: 1, precioUnitario: 0, pizzaId: null },
+    ]);
   };
 
   const quitarLinea = (key) => {
@@ -109,15 +156,16 @@ const EditarPedido = () => {
     let ok = true;
     const nuevosErr = {};
 
-    if (!horaEntrega)                     { setErrHora("La hora de entrega es obligatoria."); ok = false; }
+    if (!horaEntrega)                      { setErrHora("La hora de entrega es obligatoria."); ok = false; }
     if (!demoraMin || Number(demoraMin) < 1) { setErrDemora("La demora estimada es obligatoria."); ok = false; }
-    if (lineas.length === 0)              { setError("Debe haber al menos una pizza en el pedido."); return false; }
+    if (lineas.length === 0)               { setError("Debe haber al menos una pizza en el pedido."); return false; }
 
     for (const l of lineas) {
       const msgs = [];
-      if (!l.variedad) msgs.push("variedad");
-      if (!l.tipo)     msgs.push("tipo");
-      if (!l.tamanio)  msgs.push("tamaño");
+      if (!l.variedad)                   msgs.push("variedad");
+      if (!l.tipo)                       msgs.push("tipo");
+      if (!l.tamanio)                    msgs.push("tamaño");
+      if (!l.pizzaId)                    msgs.push("combinación no encontrada");
       if (!l.cantidad || l.cantidad < 1) msgs.push("cantidad");
       if (msgs.length) { nuevosErr[l._key] = `Completá: ${msgs.join(", ")}.`; ok = false; }
     }
@@ -230,10 +278,9 @@ const EditarPedido = () => {
             </div>
 
             {lineas.map((linea) => {
-              const pizza            = pizzaSeleccionada(linea.variedad);
-              const tiposDisponibles = pizza?.tipos ?? [];
-              const tamaniosDisp     = pizza ? TAMANIOS.filter((t) => pizza.precios?.[t] !== undefined) : [];
-              const errLinea         = errLineas[linea._key];
+              const tipos    = tiposDeVariedad(linea.variedad);
+              const tamanios = tamaniosDeVariedad(linea.variedad, linea.tipo);
+              const errLinea = errLineas[linea._key];
 
               return (
                 <div key={linea._key} className={`linea-pedido${errLinea ? " linea-pedido--error" : ""}`}>
@@ -248,7 +295,9 @@ const EditarPedido = () => {
                         onChange={(e) => actualizarLinea(linea._key, "variedad", e.target.value)}
                       >
                         <option value="">Seleccionar...</option>
-                        {pizzas.map((p) => <option key={p.id} value={p.nombre}>{p.nombre}</option>)}
+                        {variedadesUnicas.map((nombre) => (
+                          <option key={nombre} value={nombre}>{nombre}</option>
+                        ))}
                       </select>
                     </div>
 
@@ -261,7 +310,9 @@ const EditarPedido = () => {
                         disabled={!linea.variedad}
                       >
                         <option value="">Seleccionar...</option>
-                        {tiposDisponibles.map((t) => <option key={t} value={t}>{t}</option>)}
+                        {tipos.map((t) => (
+                          <option key={t} value={t}>{TIPO_LABEL[t] ?? t}</option>
+                        ))}
                       </select>
                     </div>
 
@@ -271,10 +322,12 @@ const EditarPedido = () => {
                         className={`form-input${errLinea && !linea.tamanio ? " form-input--error" : ""}`}
                         value={linea.tamanio}
                         onChange={(e) => actualizarLinea(linea._key, "tamanio", e.target.value)}
-                        disabled={!linea.variedad}
+                        disabled={!linea.variedad || !linea.tipo}
                       >
                         <option value="">Seleccionar...</option>
-                        {tamaniosDisp.map((t) => <option key={t} value={t}>{t} porciones</option>)}
+                        {tamanios.map((t) => (
+                          <option key={t} value={t}>{TAM_LABEL[t] ?? `${t} porciones`}</option>
+                        ))}
                       </select>
                     </div>
 

@@ -4,7 +4,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { crearPedido, calcularTotal } from "../../services/pedidoService";
-import { getPizzas } from "../../services/pizzaService";
+import { getPizzas, getPizzaId } from "../../services/pizzaService";
 import "./Pedidos.css";
 
 const TAMANIOS     = [8, 10, 12];
@@ -13,31 +13,52 @@ const MAX_CANTIDAD = 99;
 const MAX_CLIENTE  = 50;
 const MAX_DEMORA   = 999; // minutos
 
+// Mapeo tamaño numérico → enum backend (para mostrar en selects)
+const TIPO_LABEL   = { PIEDRA: "A la piedra", PARRILLA: "A la parrilla", MOLDE: "De molde" };
+const TAM_LABEL    = { 8: "8 porciones", 10: "10 porciones", 12: "12 porciones" };
+
 const lineaVacia = () => ({
-  _key: Date.now() + Math.random(),
-  variedad: "",
-  tipo: "",
-  tamanio: "",
-  cantidad: 1,
+  _key:           Date.now() + Math.random(),
+  variedad:       "",
+  tipo:           "",
+  tamanio:        "",
+  cantidad:       1,
   precioUnitario: 0,
+  pizzaId:        null,
 });
 
 const NuevoPedido = () => {
   const navigate = useNavigate();
-  const [pizzas,       setPizzas]       = useState([]);
-  const [cliente,      setCliente]      = useState("");
-  const [horaEntrega,  setHoraEntrega]  = useState("");
-  const [demoraMin,    setDemoraMin]    = useState("");
-  const [lineas,       setLineas]       = useState([lineaVacia()]);
-  const [error,        setError]        = useState("");
-  const [saving,       setSaving]       = useState(false);
-  const [errLineas,    setErrLineas]    = useState({});
-  const [errDemora,    setErrDemora]    = useState("");
-  const [errHora,      setErrHora]      = useState("");
+  const [pizzas,      setPizzas]      = useState([]); // lista plana mapeada
+  const [cliente,     setCliente]     = useState("");
+  const [horaEntrega, setHoraEntrega] = useState("");
+  const [demoraMin,   setDemoraMin]   = useState("");
+  const [lineas,      setLineas]      = useState([lineaVacia()]);
+  const [error,       setError]       = useState("");
+  const [saving,      setSaving]      = useState(false);
+  const [errLineas,   setErrLineas]   = useState({});
+  const [errDemora,   setErrDemora]   = useState("");
+  const [errHora,     setErrHora]     = useState("");
 
   useEffect(() => { getPizzas().then(setPizzas); }, []);
 
-  const pizzaSeleccionada = (nombre) => pizzas.find((p) => p.nombre === nombre);
+  // Nombres únicos de variedad para el select
+  const variedadesUnicas = [...new Set(pizzas.map((p) => p.nombre))].sort();
+
+  // Tipos disponibles para una variedad dada
+  const tiposDeVariedad = (nombreVariedad) =>
+    [...new Set(
+      pizzas
+        .filter((p) => p.nombre === nombreVariedad)
+        .map((p) => p.tipoCoccion)
+    )];
+
+  // Tamaños disponibles para una variedad + tipo dados
+  const tamaniosDeVariedad = (nombreVariedad, tipo) =>
+    pizzas
+      .filter((p) => p.nombre === nombreVariedad && p.tipoCoccion === tipo)
+      .map((p) => p.tamanio)
+      .sort((a, b) => a - b);
 
   const handleDemoraMin = (val) => {
     const limpio = val.replace(/\D/g, "");
@@ -57,17 +78,34 @@ const NuevoPedido = () => {
       prev.map((l) => {
         if (l._key !== key) return l;
         const act = { ...l, [campo]: valor };
+
+        // Al cambiar variedad, resetear todo lo dependiente
         if (campo === "variedad") {
-          act.tipo = ""; act.tamanio = ""; act.precioUnitario = 0;
+          act.tipo           = "";
+          act.tamanio        = "";
+          act.precioUnitario = 0;
+          act.pizzaId        = null;
         }
-        if (campo === "tipo") act.precioUnitario = 0;
-        if ((campo === "tamanio" || campo === "variedad") && act.variedad && act.tamanio) {
-          const pz = pizzaSeleccionada(act.variedad);
-          act.precioUnitario = pz?.precios?.[act.tamanio] ?? 0;
+
+        // Al cambiar tipo, resetear tamaño y precio
+        if (campo === "tipo") {
+          act.tamanio        = "";
+          act.precioUnitario = 0;
+          act.pizzaId        = null;
         }
+
+        // Cuando se elige tamaño (y ya hay variedad + tipo), buscar precio y pizzaId
+        if (campo === "tamanio" && act.variedad && act.tipo) {
+          const id = getPizzaId(pizzas, act.variedad, act.tipo, Number(valor));
+          const pz = pizzas.find((p) => p.id === id);
+          act.pizzaId        = id;
+          act.precioUnitario = pz?.precio ?? 0;
+        }
+
         if (campo === "cantidad") {
           act.cantidad = Math.min(Math.max(1, Number(valor) || 1), MAX_CANTIDAD);
         }
+
         return act;
       })
     );
@@ -103,10 +141,11 @@ const NuevoPedido = () => {
 
     for (const l of lineas) {
       const msgs = [];
-      if (!l.variedad) msgs.push("variedad");
-      if (!l.tipo)     msgs.push("tipo");
-      if (!l.tamanio)  msgs.push("tamaño");
-      if (!l.cantidad || l.cantidad < 1) msgs.push("cantidad");
+      if (!l.variedad)                    msgs.push("variedad");
+      if (!l.tipo)                        msgs.push("tipo");
+      if (!l.tamanio)                     msgs.push("tamaño");
+      if (!l.pizzaId)                     msgs.push("combinación no encontrada");
+      if (!l.cantidad || l.cantidad < 1)  msgs.push("cantidad");
       if (msgs.length) {
         nuevosErrLineas[l._key] = `Completá: ${msgs.join(", ")}.`;
         ok = false;
@@ -123,14 +162,17 @@ const NuevoPedido = () => {
     if (!validar()) return;
     setSaving(true);
     try {
-      const demoraStr = `${demoraMin} min`;
       const lineasLimpias = lineas.map(({ _key, ...rest }) => ({
         ...rest,
-        id: Date.now() + Math.random(),
         tamanio:  Number(rest.tamanio),
         cantidad: Number(rest.cantidad),
       }));
-      await crearPedido({ cliente, horaEntrega, demoraEstimada: demoraStr, lineas: lineasLimpias });
+      await crearPedido({
+        cliente,
+        horaEntrega,
+        demoraEstimada: `${demoraMin} min`,
+        lineas: lineasLimpias,
+      });
       navigate("/pedidos");
     } catch (e) {
       setError(e.message);
@@ -173,7 +215,6 @@ const NuevoPedido = () => {
         </div>
 
         <div className="form-row-group">
-          {/* Hora de entrega */}
           <div className="form-row">
             <label className="form-label">Hora de entrega *</label>
             <input
@@ -185,7 +226,6 @@ const NuevoPedido = () => {
             {errHora && <span className="form-field-error">{errHora}</span>}
           </div>
 
-          {/* Demora estimada — solo minutos */}
           <div className="form-row">
             <label className="form-label">
               Demora estimada * <span className="form-optional">(minutos — máx. {MAX_DEMORA})</span>
@@ -209,9 +249,7 @@ const NuevoPedido = () => {
         <div className="lineas-header">
           <h2 className="form-section__title">
             Pizzas
-            <span className="lineas-contador">
-              {lineas.length} / {MAX_LINEAS}
-            </span>
+            <span className="lineas-contador">{lineas.length} / {MAX_LINEAS}</span>
           </h2>
           <button
             className="btn btn--ghost btn--sm"
@@ -224,11 +262,8 @@ const NuevoPedido = () => {
         </div>
 
         {lineas.map((linea) => {
-          const pizza            = pizzaSeleccionada(linea.variedad);
-          const tiposDisponibles = pizza?.tipos ?? [];
-          const tamaniosDisp     = pizza
-            ? TAMANIOS.filter((t) => pizza.precios?.[t] !== undefined)
-            : [];
+          const tipos    = tiposDeVariedad(linea.variedad);
+          const tamanios = tamaniosDeVariedad(linea.variedad, linea.tipo);
           const errLinea = errLineas[linea._key];
 
           return (
@@ -236,6 +271,7 @@ const NuevoPedido = () => {
               {errLinea && <span className="form-field-error linea-error-msg">{errLinea}</span>}
 
               <div className="linea-pedido__campos">
+                {/* Variedad */}
                 <div className="form-row">
                   <label className="form-label">Variedad *</label>
                   <select
@@ -244,12 +280,13 @@ const NuevoPedido = () => {
                     onChange={(e) => actualizarLinea(linea._key, "variedad", e.target.value)}
                   >
                     <option value="">Seleccionar...</option>
-                    {pizzas.map((p) => (
-                      <option key={p.id} value={p.nombre}>{p.nombre}</option>
+                    {variedadesUnicas.map((nombre) => (
+                      <option key={nombre} value={nombre}>{nombre}</option>
                     ))}
                   </select>
                 </div>
 
+                {/* Tipo */}
                 <div className="form-row">
                   <label className="form-label">Tipo *</label>
                   <select
@@ -259,27 +296,29 @@ const NuevoPedido = () => {
                     disabled={!linea.variedad}
                   >
                     <option value="">Seleccionar...</option>
-                    {tiposDisponibles.map((t) => (
-                      <option key={t} value={t}>{t}</option>
+                    {tipos.map((t) => (
+                      <option key={t} value={t}>{TIPO_LABEL[t] ?? t}</option>
                     ))}
                   </select>
                 </div>
 
+                {/* Tamaño */}
                 <div className="form-row">
                   <label className="form-label">Tamaño *</label>
                   <select
                     className={`form-input${errLinea && !linea.tamanio ? " form-input--error" : ""}`}
                     value={linea.tamanio}
                     onChange={(e) => actualizarLinea(linea._key, "tamanio", e.target.value)}
-                    disabled={!linea.variedad}
+                    disabled={!linea.variedad || !linea.tipo}
                   >
                     <option value="">Seleccionar...</option>
-                    {tamaniosDisp.map((t) => (
-                      <option key={t} value={t}>{t} porciones</option>
+                    {tamanios.map((t) => (
+                      <option key={t} value={t}>{TAM_LABEL[t] ?? `${t} porciones`}</option>
                     ))}
                   </select>
                 </div>
 
+                {/* Cantidad */}
                 <div className="form-row">
                   <label className="form-label">
                     Cantidad * <span className="form-optional">(máx. {MAX_CANTIDAD})</span>
@@ -294,6 +333,7 @@ const NuevoPedido = () => {
                   />
                 </div>
 
+                {/* Precio unitario (solo lectura) */}
                 <div className="form-row">
                   <label className="form-label">Precio unit.</label>
                   <input

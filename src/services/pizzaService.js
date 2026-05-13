@@ -1,18 +1,21 @@
-// pizzaService.js — Fase 2 (backend Java)
+// pizzaService.js
 //
 // El backend maneja pizzas como entidades individuales:
-// { id, nombre, tipoCoccion, tamanio, descripcion, precio }
+// { id, name, cookingType, size, description, price }
 //
 // El front agrupa por nombre para mostrarlas como una sola variedad.
 //
-// Endpoints:
-//   GET    /api/pizzas        → lista plana de todas las combinaciones
-//   GET    /api/pizzas/:id    → una combinación
-//   POST   /api/pizzas        → crear una combinación
-//   PUT    /api/pizzas/:id    → modificar una combinación
-//   DELETE /api/pizzas/:id    → eliminar una combinación
+// Endpoints del backend:
+//   GET    /pizza/traer          → lista plana de todas las combinaciones
+//   POST   /pizza/guardar        → crear una combinación
+//   PUT    /pizza/editar/:id     → modificar una combinación
+//   DELETE /pizza/eliminar/:id   → eliminar una combinación
 
-const BASE = "/api/pizzas";
+const BASE = "/pizza";
+
+// Mapeos backend ↔ frontend
+const SIZE_REVERSE = { SMALL: 8, MEDIUM: 10, LARGE: 12 };
+const SIZE_MAP     = { 8: "SMALL", 10: "MEDIUM", 12: "LARGE" };
 
 const handleResponse = async (res) => {
   if (res.ok) {
@@ -27,34 +30,42 @@ const handleResponse = async (res) => {
   throw new Error(msg);
 };
 
-// GET /api/pizzas — devuelve lista plana
+// GET /pizza/traer — devuelve lista plana, mapeada al formato del front
 export const getPizzas = async () => {
-  const res = await fetch(BASE, { credentials: "include" });
-  return handleResponse(res);
+  const res  = await fetch(`${BASE}/traer`, { credentials: "include" });
+  const data = await handleResponse(res);
+  // Mapeamos los campos del backend al formato que usa el front
+  return data.map((p) => ({
+    id:          p.id,
+    nombre:      p.name,
+    tipoCoccion: p.cookingType,              // "PIEDRA" | "PARRILLA" | "MOLDE"
+    tamanio:     SIZE_REVERSE[p.size] ?? p.size, // 8 | 10 | 12
+    descripcion: p.description,
+    precio:      p.price,
+  }));
 };
 
-// GET pizza por id agrupado (busca en la lista completa)
-export const getPizzaById = async (id) => {
-  const res = await fetch(`${BASE}/${id}`, { credentials: "include" });
-  return handleResponse(res);
-};
-
-// POST /api/pizzas — una combinación por vez
-// payload: { nombre, tipoCoccion, tamanio, descripcion, precio }
+// POST /pizza/guardar — crea una combinación
+// payload interno: { nombre, tipoCoccion, tamanio, descripcion, precio }
 export const crearPizza = async (data) => {
-  const res = await fetch(BASE, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
+  const body = {
+    name:        data.nombre,
+    cookingType: data.tipoCoccion,
+    size:        SIZE_MAP[data.tamanio] ?? data.tamanio,
+    description: data.descripcion,
+    price:       data.precio,
+  };
+  const res = await fetch(`${BASE}/guardar`, {
+    method:      "POST",
+    headers:     { "Content-Type": "application/json" },
     credentials: "include",
-    body: JSON.stringify(data),
+    body:        JSON.stringify(body),
   });
   return handleResponse(res);
 };
 
 // Crea las 9 combinaciones de una variedad de una vez
-// Devuelve array de resultados o lanza error si alguno falla
 export const crearVariedad = async ({ nombre, descripcion, precios }) => {
-  // precios: { PIEDRA: { 8: x, 10: x, 12: x }, PARRILLA: {...}, MOLDE: {...} }
   const TIPOS    = ["PIEDRA", "PARRILLA", "MOLDE"];
   const TAMANIOS = [8, 10, 12];
 
@@ -65,8 +76,8 @@ export const crearVariedad = async ({ nombre, descripcion, precios }) => {
         nombre,
         descripcion,
         tipoCoccion: tipo,
-        tamanio: tam,
-        precio: Number(precios[tipo][tam]),
+        tamanio:     tam,
+        precio:      Number(precios[tipo][tam]),
       });
     }
   }
@@ -75,21 +86,29 @@ export const crearVariedad = async ({ nombre, descripcion, precios }) => {
   return resultados;
 };
 
-// PUT /api/pizzas/:id
+// PUT /pizza/editar/:id
+// payload interno: { nombre, tipoCoccion, tamanio, descripcion, precio }
 export const modificarPizza = async (id, data) => {
-  const res = await fetch(`${BASE}/${id}`, {
-    method: "PUT",
-    headers: { "Content-Type": "application/json" },
+  const body = {
+    name:        data.nombre,
+    cookingType: data.tipoCoccion,
+    size:        SIZE_MAP[data.tamanio] ?? data.tamanio,
+    description: data.descripcion,
+    price:       data.precio,
+  };
+  const res = await fetch(`${BASE}/editar/${id}`, {
+    method:      "PUT",
+    headers:     { "Content-Type": "application/json" },
     credentials: "include",
-    body: JSON.stringify(data),
+    body:        JSON.stringify(body),
   });
   return handleResponse(res);
 };
 
-// DELETE /api/pizzas/:id
+// DELETE /pizza/eliminar/:id
 export const eliminarPizza = async (id) => {
-  const res = await fetch(`${BASE}/${id}`, {
-    method: "DELETE",
+  const res = await fetch(`${BASE}/eliminar/${id}`, {
+    method:      "DELETE",
     credentials: "include",
   });
   return handleResponse(res);
@@ -104,17 +123,18 @@ export const eliminarVariedad = async (nombre, todasLasPizzas) => {
 };
 
 // Helper: agrupa lista plana por nombre
-// Devuelve array de { nombre, descripcion, tipos, precios }
-// donde precios[tipo][tamanio] = precio
+// Devuelve array de { nombre, descripcion, precios, ids }
+// donde precios[tipoCoccion][tamanio] = precio
+//       ids[tipoCoccion][tamanio]     = id
 export const agruparPorVariedad = (pizzas) => {
   const mapa = {};
   for (const p of pizzas) {
     if (!mapa[p.nombre]) {
       mapa[p.nombre] = {
-        nombre: p.nombre,
+        nombre:      p.nombre,
         descripcion: p.descripcion,
-        precios: {},     // { PIEDRA: { 8: x, ... }, ... }
-        ids: {},         // { PIEDRA: { 8: id, ... }, ... }  ← para editar/eliminar
+        precios:     {},
+        ids:         {},
       };
     }
     const v = mapa[p.nombre];
@@ -124,4 +144,16 @@ export const agruparPorVariedad = (pizzas) => {
     v.ids[p.tipoCoccion][p.tamanio]     = p.id;
   }
   return Object.values(mapa);
+};
+
+// Dado el array plano de pizzas, devuelve el id de la combinación específica
+// Útil al armar líneas de pedido
+export const getPizzaId = (pizzas, nombre, tipoCoccion, tamanio) => {
+  const pz = pizzas.find(
+    (p) =>
+      p.nombre      === nombre &&
+      p.tipoCoccion === tipoCoccion &&
+      p.tamanio     === Number(tamanio)
+  );
+  return pz?.id ?? null;
 };

@@ -22,19 +22,18 @@ const MAX_NOMBRE      = 50;
 const MAX_DESCRIPCION = 200;
 const MAX_PRECIO      = 999999;
 
-// Grilla vacía: { PIEDRA: { 8: "", 10: "", 12: "" }, PARRILLA: {...}, MOLDE: {...} }
 const grillaVacia = () =>
   Object.fromEntries(TIPOS.map((t) => [t, Object.fromEntries(TAMANIOS.map((s) => [s, ""]))]));
 
 const PizzaForm = () => {
-  const { nombre: nombreParam } = useParams(); // edición: /menu/editar/:nombre
+  const { nombre: nombreParam } = useParams();
   const navigate  = useNavigate();
   const esEdicion = Boolean(nombreParam);
 
-  const [nombre,      setNombre]      = useState("");
-  const [descripcion, setDescripcion] = useState("");
-  const [precios,     setPrecios]     = useState(grillaVacia());
-  const [idsExistentes, setIdsExistentes] = useState({}); // { PIEDRA: { 8: id, ... } }
+  const [nombre,        setNombre]        = useState("");
+  const [descripcion,   setDescripcion]   = useState("");
+  const [precios,       setPrecios]       = useState(grillaVacia());
+  const [idsExistentes, setIdsExistentes] = useState({});
 
   const [error,   setError]   = useState("");
   const [saving,  setSaving]  = useState(false);
@@ -47,9 +46,10 @@ const PizzaForm = () => {
         const variedades = agruparPorVariedad(lista);
         const variedad   = variedades.find((v) => v.nombre === decodeURIComponent(nombreParam));
         if (!variedad) { setError("Variedad no encontrada."); setLoading(false); return; }
+
         setNombre(variedad.nombre);
         setDescripcion(variedad.descripcion || "");
-        // Llenar grilla con los precios existentes
+
         const g = grillaVacia();
         for (const tipo of TIPOS) {
           for (const tam of TAMANIOS) {
@@ -94,21 +94,25 @@ const PizzaForm = () => {
     try {
       if (!esEdicion) {
         // Alta: crear las 9 combinaciones
-        await crearVariedad({ nombre: nombre.trim(), descripcion: descripcion.trim(), precios });
+        await crearVariedad({
+          nombre:      nombre.trim(),
+          descripcion: descripcion.trim(),
+          precios,
+        });
       } else {
         // Edición: PUT a cada una de las 9 combinaciones existentes
         const promises = [];
         for (const tipo of TIPOS) {
           for (const tam of TAMANIOS) {
             const id = idsExistentes?.[tipo]?.[tam];
-            if (!id) continue; // combinación que no existía (no debería pasar)
+            if (!id) continue;
             promises.push(
               modificarPizza(id, {
-                nombre: nombre.trim(),
+                nombre:      nombre.trim(),
                 descripcion: descripcion.trim(),
                 tipoCoccion: tipo,
-                tamanio: tam,
-                precio: Number(precios[tipo][tam]),
+                tamanio:     tam,
+                precio:      Number(precios[tipo][tam]),
               })
             );
           }
@@ -142,7 +146,10 @@ const PizzaForm = () => {
 
           <div className="pizza-form__row">
             <label className="pizza-form__label">
-              Nombre * <span style={{ fontWeight: 400, color: "var(--color-text-muted)", textTransform: "none" }}>(máx. {MAX_NOMBRE} car.)</span>
+              Nombre *{" "}
+              <span style={{ fontWeight: 400, color: "var(--color-text-muted)", textTransform: "none" }}>
+                (máx. {MAX_NOMBRE} car.)
+              </span>
             </label>
             <input
               className="pizza-form__input"
@@ -151,7 +158,7 @@ const PizzaForm = () => {
               onChange={(e) => setNombre(e.target.value)}
               placeholder="Ej: Napolitana"
               maxLength={MAX_NOMBRE}
-              disabled={esEdicion} // no se puede cambiar el nombre en edición (es la clave)
+              disabled={esEdicion}
             />
             {esEdicion && (
               <span style={{ fontSize: 11, color: "var(--color-text-muted)" }}>
@@ -159,7 +166,10 @@ const PizzaForm = () => {
               </span>
             )}
             {!esEdicion && (
-              <span style={{ fontSize: 11, textAlign: "right", color: nombre.length >= MAX_NOMBRE - 5 ? "var(--color-danger)" : "var(--color-text-muted)" }}>
+              <span style={{
+                fontSize: 11, textAlign: "right",
+                color: nombre.length >= MAX_NOMBRE - 5 ? "var(--color-danger)" : "var(--color-text-muted)"
+              }}>
                 {nombre.length} / {MAX_NOMBRE}
               </span>
             )}
@@ -167,7 +177,10 @@ const PizzaForm = () => {
 
           <div className="pizza-form__row">
             <label className="pizza-form__label">
-              Descripción * <span style={{ fontWeight: 400, color: "var(--color-text-muted)", textTransform: "none" }}>(máx. {MAX_DESCRIPCION} car.)</span>
+              Descripción *{" "}
+              <span style={{ fontWeight: 400, color: "var(--color-text-muted)", textTransform: "none" }}>
+                (máx. {MAX_DESCRIPCION} car.)
+              </span>
             </label>
             <input
               className="pizza-form__input"
@@ -177,7 +190,10 @@ const PizzaForm = () => {
               placeholder="Ej: Tomate, mozzarella, aceitunas"
               maxLength={MAX_DESCRIPCION}
             />
-            <span style={{ fontSize: 11, textAlign: "right", color: descripcion.length >= MAX_DESCRIPCION - 20 ? "var(--color-danger)" : "var(--color-text-muted)" }}>
+            <span style={{
+              fontSize: 11, textAlign: "right",
+              color: descripcion.length >= MAX_DESCRIPCION - 20 ? "var(--color-danger)" : "var(--color-text-muted)"
+            }}>
               {descripcion.length} / {MAX_DESCRIPCION}
             </span>
           </div>
@@ -195,9 +211,7 @@ const PizzaForm = () => {
               <thead>
                 <tr>
                   <th></th>
-                  {TAMANIOS.map((t) => (
-                    <th key={t}>{TAM_LABEL[t]}</th>
-                  ))}
+                  {TAMANIOS.map((t) => <th key={t}>{TAM_LABEL[t]}</th>)}
                 </tr>
               </thead>
               <tbody>

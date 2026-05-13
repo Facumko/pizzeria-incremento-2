@@ -1,3 +1,13 @@
+// pedidoService.js
+//
+// Endpoints del backend:
+//   GET    /pedido/traer                  → todos los pedidos
+//   POST   /pedido/guardar                → crear pedido
+//   PUT    /pedido/editar/:id             → modificar pedido
+//   DELETE /pedido/eliminar/:id           → eliminar pedido
+//   PATCH  /pedido/editar/listo/:id       → marcar como Listo
+//   PATCH  /pedido/editar/facturado/:id   → marcar como Facturado
+
 const STATUS_REVERSE = {
   PENDING:  "Pendiente",
   READY:    "Listo",
@@ -48,10 +58,10 @@ export const getPedidos = async (filtroEstado = "") => {
   return mapped.filter((p) => p.estado === filtroEstado);
 };
 
-// GET pedido por id
+// Obtiene un pedido por id (busca en la lista completa)
 export const getPedidoById = async (id) => {
   const pedidos = await getPedidos();
-  const pedido = pedidos.find((p) => p.id === Number(id));
+  const pedido  = pedidos.find((p) => p.id === Number(id));
   if (!pedido) throw new Error("Pedido no encontrado");
   return pedido;
 };
@@ -63,7 +73,7 @@ export const crearPedido = async (data) => {
     timeEstimated: Number(data.demoraEstimada?.replace(/\D/g, "") ?? 0),
     items: data.lineas.map((l) => ({
       pizzaId:  l.pizzaId,
-      quantity: l.cantidad,
+      quantity: Number(l.cantidad),
     })),
   };
   const res = await fetch("/pedido/guardar", {
@@ -80,14 +90,14 @@ export const crearPedido = async (data) => {
   return mapPedido(await res.json());
 };
 
-// PUT /pedido/editar/{id}
+// PUT /pedido/editar/:id
 export const modificarPedido = async (id, data) => {
   const body = {
     clientName:    data.cliente || "Consumidor Final",
     timeEstimated: Number(data.demoraEstimada?.replace(/\D/g, "") ?? 0),
     items: data.lineas.map((l) => ({
       pizzaId:  l.pizzaId,
-      quantity: l.cantidad,
+      quantity: Number(l.cantidad),
     })),
   };
   const res = await fetch(`/pedido/editar/${id}`, {
@@ -100,21 +110,23 @@ export const modificarPedido = async (id, data) => {
   return mapPedido(await res.json());
 };
 
-// PATCH — pendiente confirmación del backend
+// PATCH /pedido/editar/listo/:id
 export const marcarComoListo = async (id) => {
-  const res = await fetch(`/pedido/editar/listo`, {
+  const res = await fetch(`/pedido/editar/listo/${id}`, {
     method:      "PATCH",
     credentials: "include",
   });
   if (!res.ok) throw new Error("Error al marcar como listo");
-  return mapPedido(await res.json());
+  // El backend devuelve 200 sin body según OrderController
+  return true;
 };
 
+// PATCH /pedido/editar/facturado/:id
 export const marcarComoFacturado = async (id) => {
-  const res = await fetch(`/pedido/editar/facturado`, {
+  const res = await fetch(`/pedido/editar/facturado/${id}`, {
     method:      "PATCH",
     credentials: "include",
   });
   if (!res.ok) throw new Error("Error al marcar como facturado");
-  return mapPedido(await res.json());
+  return true;
 };

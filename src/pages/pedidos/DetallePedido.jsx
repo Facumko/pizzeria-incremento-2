@@ -1,23 +1,46 @@
 // DetallePedido.jsx — CU-08 (detalle)
 // Vista de solo lectura del pedido completo.
+// Permite marcar como Facturado si el estado es "Listo".
 
 import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { getPedidoById, calcularTotal } from "../../services/pedidoService";
+import { getPedidoById, calcularTotal, marcarComoFacturado } from "../../services/pedidoService";
 import Badge from "../../components/ui/Badge";
+import Modal from "../../components/ui/Modal";
 import "./Pedidos.css";
 
 const DetallePedido = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const [pedido, setPedido] = useState(null);
-  const [error,  setError]  = useState("");
+
+  const [pedido,   setPedido]   = useState(null);
+  const [error,    setError]    = useState("");
+  const [modal,    setModal]    = useState(false);
+  const [saving,   setSaving]   = useState(false);
+  const [feedback, setFeedback] = useState("");
 
   useEffect(() => {
     getPedidoById(id)
       .then(setPedido)
       .catch((e) => setError(e.message));
   }, [id]);
+
+  const confirmarFacturar = async () => {
+    setSaving(true);
+    try {
+      await marcarComoFacturado(pedido.id);
+      setModal(false);
+      setFeedback("Pedido facturado correctamente.");
+      // Recargar para reflejar el nuevo estado
+      const actualizado = await getPedidoById(id);
+      setPedido(actualizado);
+    } catch (e) {
+      setFeedback(`Error: ${e.message}`);
+      setModal(false);
+    } finally {
+      setSaving(false);
+    }
+  };
 
   if (error)   return <div className="page-container"><div className="alert-error">{error}</div></div>;
   if (!pedido) return <div className="page-container"><p className="empty-message">Cargando...</p></div>;
@@ -41,13 +64,26 @@ const DetallePedido = () => {
         </div>
       </div>
 
+      {feedback && (
+        <div
+          className="alert-error"
+          style={{
+            background:   "#eafaf1",
+            borderColor:  "#82e0aa",
+            color:        "#1e8449",
+            marginBottom: "var(--space-md)",
+          }}
+        >
+          {feedback}
+        </div>
+      )}
+
       <div className="card">
         <p className="detalle-campo">
-          <span className="detalle-label">Cliente:</span>
+          <span className="detalle-label">Cliente: </span>
           {pedido.cliente || <em style={{ color: "var(--color-text-muted)" }}>Consumidor final</em>}
         </p>
 
-        {/* Wrapper con scroll horizontal para pantallas chicas */}
         <div className="detalle-tabla-wrapper">
           <table className="detalle-tabla">
             <thead>
@@ -85,17 +121,33 @@ const DetallePedido = () => {
 
         <div className="detalle-acciones">
           {pedido.estado === "Pendiente" && (
-            <button className="btn btn--ghost" onClick={() => navigate(`/pedidos/editar/${pedido.id}`)}>
+            <button
+              className="btn btn--ghost"
+              onClick={() => navigate(`/pedidos/editar/${pedido.id}`)}
+            >
               Editar pedido
             </button>
           )}
           {pedido.estado === "Listo" && (
-            <button className="btn btn--primary" onClick={() => navigate(`/facturacion/${pedido.id}`)}>
+            <button
+              className="btn btn--primary"
+              onClick={() => setModal(true)}
+              disabled={saving}
+            >
               Generar factura
             </button>
           )}
         </div>
       </div>
+
+      <Modal
+        isOpen={modal}
+        onClose={() => setModal(false)}
+        onConfirm={confirmarFacturar}
+        title="Confirmar facturación"
+        body={`¿Confirmás que el pedido #${pedido.nroPedido} fue entregado y querés generar la factura?`}
+        confirmLabel={saving ? "Facturando..." : "Sí, facturar"}
+      />
     </div>
   );
 };
