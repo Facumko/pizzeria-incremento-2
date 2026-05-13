@@ -6,8 +6,9 @@ import "./Layout.css";
 
 // Links por rol
 const LINKS_MOSTRADOR = [
-  { to: "/pedidos", label: "Pedidos" },
-  { to: "/menu", label: "Menú" },
+  { to: "/pedidos",     label: "Pedidos"     },
+  { to: "/facturacion", label: "Facturación" },
+  { to: "/menu",        label: "Menú"        },
 ];
 
 const LINKS_COCINA = [
@@ -39,15 +40,13 @@ const Sidebar = () => {
   return (
     <aside className="sidebar">
       <div className="sidebar__brand">
-        {/* Nuevo contenedor para el logo PNG */}
         <div className="sidebar__logo-container">
-          <img 
-            src="/logo-pizza.png" 
-            alt="Logo" 
-            className="sidebar__logo-img" 
+          <img
+            src="/logo-pizza.png"
+            alt="Logo"
+            className="sidebar__logo-img"
           />
         </div>
-        
         <div className="sidebar__brand-info">
           <div className="sidebar__brand-title">Pizzería</div>
         </div>

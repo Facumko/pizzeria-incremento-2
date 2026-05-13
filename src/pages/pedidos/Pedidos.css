@@ -13,6 +13,7 @@
 .filtro-btn {
   display: inline-flex;
   align-items: center;
+  gap: 6px;
   justify-content: center;
   height: 38px;
   min-width: 100px;
@@ -40,6 +41,57 @@
   color: #fff;
   border-color: var(--color-primary);
   box-shadow: 0 2px 6px rgba(192, 57, 43, 0.25);
+}
+
+.filtro-btn__count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 6px;
+  border-radius: 10px;
+  font-size: 11px;
+  font-weight: 700;
+  background: rgba(0,0,0,0.08);
+  color: inherit;
+  line-height: 1;
+}
+
+.filtro-btn__count--active {
+  background: rgba(255,255,255,0.25);
+  color: #fff;
+}
+
+/* ── Separadores de grupo ── */
+.estado-separador {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  padding: var(--space-sm) 0 var(--space-xs);
+  margin-top: var(--space-sm);
+}
+
+.estado-separador:first-child {
+  margin-top: 0;
+}
+
+.estado-separador__label {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--color-text-muted);
+}
+
+.estado-separador__count {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--color-text-muted);
+  background: var(--color-surface-alt);
+  border: 1px solid var(--color-border);
+  border-radius: 10px;
+  padding: 1px 7px;
 }
 
 /* ── Lista de pedidos ── */
@@ -100,7 +152,7 @@
   display: grid;
   grid-template-columns: 110px 100px 80px;
   align-items: center;
-  justify-items: center; /* Centra el Badge y el Botón en su celda */
+  justify-items: center;
   gap: var(--space-md);
   flex-shrink: 0;
 }
@@ -109,7 +161,7 @@
   font-weight: 800;
   font-size: var(--font-size-lg);
   color: var(--color-primary);
-  justify-self: end; /* El total queda alineado a la derecha */
+  justify-self: end;
 }
 
 .pedido-row__right .btn--ghost {

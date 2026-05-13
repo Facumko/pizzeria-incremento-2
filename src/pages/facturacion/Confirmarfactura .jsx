@@ -5,8 +5,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { getPedidoById } from "../../services/pedidoService";
-import { generarFactura, calcularTotal } from "../../services/facturaService";
-import { getFacturas } from "../../services/facturaService";
+import { generarFactura, calcularTotal, getFacturas } from "../../services/facturaService";
 import Modal from "../../components/ui/Modal";
 import "./Facturacion.css";
 
@@ -26,7 +25,6 @@ const ConfirmarFactura = () => {
           setError(`Este pedido no puede facturarse (estado actual: ${p.estado}).`);
           return;
         }
-        // Verificar que no tenga ya una factura
         getFacturas()
           .then((facturas) => {
             const yaFacturado = facturas.some((f) => f.pedido.id === p.id);
@@ -36,7 +34,7 @@ const ConfirmarFactura = () => {
             }
             setPedido(p);
           })
-          .catch(() => setPedido(p)); // si falla la verificación, igual mostramos
+          .catch(() => setPedido(p));
       })
       .catch((e) => setError(e.message));
   }, [id]);
@@ -46,8 +44,16 @@ const ConfirmarFactura = () => {
     try {
       await generarFactura(pedido.id);
       setModal(false);
-      // Redirigir al historial para ver la factura generada
-      navigate("/facturas", { state: { nuevo: true } });
+
+      // Buscar la factura recién creada para redirigir directo a VistaFactura
+      const facturas = await getFacturas();
+      const nueva = facturas.find((f) => f.pedido.id === pedido.id);
+
+      if (nueva) {
+        navigate(`/facturas/${nueva.id}`, { state: { nuevo: true } });
+      } else {
+        navigate("/facturas", { state: { nuevo: true } });
+      }
     } catch (e) {
       setError(e.message);
       setModal(false);
@@ -90,7 +96,6 @@ const ConfirmarFactura = () => {
       <div className="card confirmar-factura__resumen">
         <p className="confirmar-factura__titulo">Detalle del pedido</p>
 
-        {/* Info del cliente */}
         <div style={{ marginBottom: "var(--space-md)", display: "flex", gap: "var(--space-xl)", flexWrap: "wrap" }}>
           <div>
             <span style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase", color: "var(--color-text-muted)" }}>
@@ -114,7 +119,6 @@ const ConfirmarFactura = () => {
           </div>
         </div>
 
-        {/* Líneas */}
         <div className="confirmar-factura__lineas">
           {pedido.lineas.map((l, i) => (
             <div key={i} className="confirmar-factura__linea">

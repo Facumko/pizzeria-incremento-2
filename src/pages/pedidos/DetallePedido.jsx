@@ -5,6 +5,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { getPedidoById, calcularTotal, marcarComoFacturado } from "../../services/pedidoService";
+import { getFacturas } from "../../services/facturaService";
 import Badge from "../../components/ui/Badge";
 import Modal from "../../components/ui/Modal";
 import "./Pedidos.css";
@@ -17,7 +18,6 @@ const DetallePedido = () => {
   const [error,    setError]    = useState("");
   const [modal,    setModal]    = useState(false);
   const [saving,   setSaving]   = useState(false);
-  const [feedback, setFeedback] = useState("");
 
   useEffect(() => {
     getPedidoById(id)
@@ -30,12 +30,18 @@ const DetallePedido = () => {
     try {
       await marcarComoFacturado(pedido.id);
       setModal(false);
-      setFeedback("Pedido facturado correctamente.");
-      // Recargar para reflejar el nuevo estado
-      const actualizado = await getPedidoById(id);
-      setPedido(actualizado);
+
+      // Buscar la factura recién creada y redirigir a VistaFactura
+      const facturas = await getFacturas();
+      const nueva = facturas.find((f) => f.pedido.id === pedido.id);
+
+      if (nueva) {
+        navigate(`/facturas/${nueva.id}`, { state: { nuevo: true } });
+      } else {
+        navigate("/facturas", { state: { nuevo: true } });
+      }
     } catch (e) {
-      setFeedback(`Error: ${e.message}`);
+      setError(`Error: ${e.message}`);
       setModal(false);
     } finally {
       setSaving(false);
@@ -63,20 +69,6 @@ const DetallePedido = () => {
           </button>
         </div>
       </div>
-
-      {feedback && (
-        <div
-          className="alert-error"
-          style={{
-            background:   "#eafaf1",
-            borderColor:  "#82e0aa",
-            color:        "#1e8449",
-            marginBottom: "var(--space-md)",
-          }}
-        >
-          {feedback}
-        </div>
-      )}
 
       <div className="card">
         <p className="detalle-campo">

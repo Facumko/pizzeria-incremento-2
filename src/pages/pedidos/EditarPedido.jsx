@@ -6,9 +6,9 @@ import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { getPedidoById, modificarPedido, calcularTotal } from "../../services/pedidoService";
 import { getPizzas, getPizzaId } from "../../services/pizzaService";
+import Modal from "../../components/ui/Modal";
 import "./Pedidos.css";
 
-const TAMANIOS     = [8, 10, 12];
 const MAX_LINEAS   = 50;
 const MAX_CANTIDAD = 99;
 const MAX_CLIENTE  = 50;
@@ -17,7 +17,6 @@ const MAX_DEMORA   = 999;
 const TIPO_LABEL = { PIEDRA: "A la piedra", PARRILLA: "A la parrilla", MOLDE: "De molde" };
 const TAM_LABEL  = { 8: "8 porciones", 10: "10 porciones", 12: "12 porciones" };
 
-// Parsea "30 min" → "30"
 const parseDemoraMin = (str = "") => {
   const matchMin = str.match(/(\d+)\s*min/);
   const matchHs  = str.match(/(\d+)\s*hs/);
@@ -27,7 +26,6 @@ const parseDemoraMin = (str = "") => {
   return num ? num[0] : "";
 };
 
-// Normaliza el tipo que viene del backend mapeado al formato "piedra" → "PIEDRA"
 const normalizarTipo = (tipo = "") => tipo.toUpperCase();
 
 const EditarPedido = () => {
@@ -45,6 +43,8 @@ const EditarPedido = () => {
   const [errLineas,   setErrLineas]   = useState({});
   const [errDemora,   setErrDemora]   = useState("");
   const [errHora,     setErrHora]     = useState("");
+  const [isDirty,     setIsDirty]     = useState(false);
+  const [modalSalir,  setModalSalir]  = useState(false);
 
   useEffect(() => {
     Promise.all([getPedidoById(id), getPizzas()])
@@ -57,33 +57,25 @@ const EditarPedido = () => {
         setCliente(pedido.cliente || "");
         setHoraEntrega(pedido.horaEntrega);
         setDemoraMin(parseDemoraMin(pedido.demoraEstimada));
-        // Las líneas del pedido ya traen pizzaId desde el mapeo del service
-        // Normalizamos el tipo a mayúsculas para que coincida con los enums del front
-        setLineas(
-          pedido.lineas.map((l) => ({
-            ...l,
-            tipo:  normalizarTipo(l.tipo),
-            _key:  l.id,
-          }))
-        );
+        setLineas(pedido.lineas.map((l) => ({ ...l, tipo: normalizarTipo(l.tipo), _key: l.id })));
         setPizzas(menuPizzas);
         setLoading(false);
       })
       .catch((e) => { setError(e.message); setLoading(false); });
   }, [id]);
 
-  // Nombres únicos de variedad
+  const marcarDirty = () => { if (!isDirty) setIsDirty(true); };
+
+  const handleCancelar = () => {
+    if (isDirty) setModalSalir(true);
+    else navigate("/pedidos");
+  };
+
   const variedadesUnicas = [...new Set(pizzas.map((p) => p.nombre))].sort();
 
-  // Tipos disponibles para una variedad dada
   const tiposDeVariedad = (nombreVariedad) =>
-    [...new Set(
-      pizzas
-        .filter((p) => p.nombre === nombreVariedad)
-        .map((p) => p.tipoCoccion)
-    )];
+    [...new Set(pizzas.filter((p) => p.nombre === nombreVariedad).map((p) => p.tipoCoccion))];
 
-  // Tamaños disponibles para una variedad + tipo dados
   const tamaniosDeVariedad = (nombreVariedad, tipo) =>
     pizzas
       .filter((p) => p.nombre === nombreVariedad && p.tipoCoccion === tipo)
@@ -91,6 +83,7 @@ const EditarPedido = () => {
       .sort((a, b) => a - b);
 
   const handleDemoraMin = (val) => {
+    marcarDirty();
     const limpio = val.replace(/\D/g, "");
     if (limpio === "") { setDemoraMin(""); setErrDemora(""); return; }
     const n = Math.min(Number(limpio), MAX_DEMORA);
@@ -99,40 +92,26 @@ const EditarPedido = () => {
   };
 
   const handleHora = (val) => {
+    marcarDirty();
     setHoraEntrega(val);
     setErrHora(val ? "" : "La hora de entrega es obligatoria.");
   };
 
   const actualizarLinea = (key, campo, valor) => {
+    marcarDirty();
     setLineas((prev) =>
       prev.map((l) => {
         if (l._key !== key) return l;
         const act = { ...l, [campo]: valor };
-
-        if (campo === "variedad") {
-          act.tipo           = "";
-          act.tamanio        = "";
-          act.precioUnitario = 0;
-          act.pizzaId        = null;
-        }
-
-        if (campo === "tipo") {
-          act.tamanio        = "";
-          act.precioUnitario = 0;
-          act.pizzaId        = null;
-        }
-
+        if (campo === "variedad") { act.tipo = ""; act.tamanio = ""; act.precioUnitario = 0; act.pizzaId = null; }
+        if (campo === "tipo")     { act.tamanio = ""; act.precioUnitario = 0; act.pizzaId = null; }
         if (campo === "tamanio" && act.variedad && act.tipo) {
           const newId = getPizzaId(pizzas, act.variedad, act.tipo, Number(valor));
           const pz    = pizzas.find((p) => p.id === newId);
           act.pizzaId        = newId;
           act.precioUnitario = pz?.precio ?? 0;
         }
-
-        if (campo === "cantidad") {
-          act.cantidad = Math.min(Math.max(1, Number(valor) || 1), MAX_CANTIDAD);
-        }
-
+        if (campo === "cantidad") act.cantidad = Math.min(Math.max(1, Number(valor) || 1), MAX_CANTIDAD);
         return act;
       })
     );
@@ -140,6 +119,7 @@ const EditarPedido = () => {
   };
 
   const agregarLinea = () => {
+    marcarDirty();
     if (lineas.length >= MAX_LINEAS) return;
     setLineas((prev) => [
       ...prev,
@@ -148,6 +128,7 @@ const EditarPedido = () => {
   };
 
   const quitarLinea = (key) => {
+    marcarDirty();
     setLineas((prev) => prev.filter((l) => l._key !== key));
     setErrLineas((prev) => { const c = { ...prev }; delete c[key]; return c; });
   };
@@ -155,11 +136,9 @@ const EditarPedido = () => {
   const validar = () => {
     let ok = true;
     const nuevosErr = {};
-
-    if (!horaEntrega)                      { setErrHora("La hora de entrega es obligatoria."); ok = false; }
+    if (!horaEntrega)                        { setErrHora("La hora de entrega es obligatoria."); ok = false; }
     if (!demoraMin || Number(demoraMin) < 1) { setErrDemora("La demora estimada es obligatoria."); ok = false; }
-    if (lineas.length === 0)               { setError("Debe haber al menos una pizza en el pedido."); return false; }
-
+    if (lineas.length === 0)                 { setError("Debe haber al menos una pizza en el pedido."); return false; }
     for (const l of lineas) {
       const msgs = [];
       if (!l.variedad)                   msgs.push("variedad");
@@ -169,7 +148,6 @@ const EditarPedido = () => {
       if (!l.cantidad || l.cantidad < 1) msgs.push("cantidad");
       if (msgs.length) { nuevosErr[l._key] = `Completá: ${msgs.join(", ")}.`; ok = false; }
     }
-
     setErrLineas(nuevosErr);
     if (!ok) setError("Revisá los campos marcados en rojo.");
     return ok;
@@ -185,13 +163,13 @@ const EditarPedido = () => {
         tamanio:  Number(rest.tamanio),
         cantidad: Number(rest.cantidad),
       }));
-      await modificarPedido(id, {
+      const actualizado = await modificarPedido(id, {
         cliente,
         horaEntrega,
         demoraEstimada: `${demoraMin} min`,
         lineas: lineasLimpias,
       });
-      navigate("/pedidos");
+      navigate("/pedidos", { state: { mensaje: `Pedido #${actualizado.nroPedido} modificado correctamente.` } });
     } catch (e) {
       setError(e.message);
     } finally {
@@ -209,7 +187,7 @@ const EditarPedido = () => {
     <div className="page-container">
       <div className="page-header">
         <h1 className="page-title">Modificar pedido</h1>
-        <button className="btn btn--secondary" onClick={() => navigate("/pedidos")}>Cancelar</button>
+        <button className="btn btn--secondary" onClick={handleCancelar}>Cancelar</button>
       </div>
 
       {error && <div className="alert-error">{error}</div>}
@@ -218,7 +196,6 @@ const EditarPedido = () => {
         <>
           <div className="form-section card">
             <h2 className="form-section__title">Datos del cliente</h2>
-
             <div className="form-row">
               <label className="form-label">
                 Nombre del cliente <span className="form-optional">(opcional — máx. {MAX_CLIENTE} caracteres)</span>
@@ -227,11 +204,10 @@ const EditarPedido = () => {
                 className="form-input"
                 type="text"
                 value={cliente}
-                onChange={(e) => setCliente(e.target.value)}
+                onChange={(e) => { marcarDirty(); setCliente(e.target.value); }}
                 maxLength={MAX_CLIENTE}
               />
             </div>
-
             <div className="form-row-group">
               <div className="form-row">
                 <label className="form-label">Hora de entrega *</label>
@@ -243,7 +219,6 @@ const EditarPedido = () => {
                 />
                 {errHora && <span className="form-field-error">{errHora}</span>}
               </div>
-
               <div className="form-row">
                 <label className="form-label">
                   Demora estimada * <span className="form-optional">(minutos — máx. {MAX_DEMORA})</span>
@@ -281,11 +256,9 @@ const EditarPedido = () => {
               const tipos    = tiposDeVariedad(linea.variedad);
               const tamanios = tamaniosDeVariedad(linea.variedad, linea.tipo);
               const errLinea = errLineas[linea._key];
-
               return (
                 <div key={linea._key} className={`linea-pedido${errLinea ? " linea-pedido--error" : ""}`}>
                   {errLinea && <span className="form-field-error linea-error-msg">{errLinea}</span>}
-
                   <div className="linea-pedido__campos">
                     <div className="form-row">
                       <label className="form-label">Variedad *</label>
@@ -300,7 +273,6 @@ const EditarPedido = () => {
                         ))}
                       </select>
                     </div>
-
                     <div className="form-row">
                       <label className="form-label">Tipo *</label>
                       <select
@@ -310,12 +282,9 @@ const EditarPedido = () => {
                         disabled={!linea.variedad}
                       >
                         <option value="">Seleccionar...</option>
-                        {tipos.map((t) => (
-                          <option key={t} value={t}>{TIPO_LABEL[t] ?? t}</option>
-                        ))}
+                        {tipos.map((t) => <option key={t} value={t}>{TIPO_LABEL[t] ?? t}</option>)}
                       </select>
                     </div>
-
                     <div className="form-row">
                       <label className="form-label">Tamaño *</label>
                       <select
@@ -325,12 +294,9 @@ const EditarPedido = () => {
                         disabled={!linea.variedad || !linea.tipo}
                       >
                         <option value="">Seleccionar...</option>
-                        {tamanios.map((t) => (
-                          <option key={t} value={t}>{TAM_LABEL[t] ?? `${t} porciones`}</option>
-                        ))}
+                        {tamanios.map((t) => <option key={t} value={t}>{TAM_LABEL[t] ?? `${t} porciones`}</option>)}
                       </select>
                     </div>
-
                     <div className="form-row">
                       <label className="form-label">
                         Cantidad * <span className="form-optional">(máx. {MAX_CANTIDAD})</span>
@@ -344,7 +310,6 @@ const EditarPedido = () => {
                         onChange={(e) => actualizarLinea(linea._key, "cantidad", e.target.value)}
                       />
                     </div>
-
                     <div className="form-row">
                       <label className="form-label">Precio unit.</label>
                       <input
@@ -355,7 +320,6 @@ const EditarPedido = () => {
                       />
                     </div>
                   </div>
-
                   <div className="linea-pedido__actions">
                     <span className="linea-subtotal">
                       Subtotal: ${(linea.precioUnitario * (Number(linea.cantidad) || 0)).toLocaleString("es-AR")}
@@ -383,6 +347,17 @@ const EditarPedido = () => {
           </div>
         </>
       )}
+
+      {/* Modal salir sin guardar */}
+      <Modal
+        isOpen={modalSalir}
+        onClose={() => setModalSalir(false)}
+        onConfirm={() => navigate("/pedidos")}
+        title="¿Salir sin guardar?"
+        body="Tenés cambios sin guardar. Si salís ahora se van a perder."
+        confirmLabel="Sí, salir"
+        danger
+      />
     </div>
   );
 };

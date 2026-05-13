@@ -1,24 +1,29 @@
 // INC-01: Login, Menú, Pedidos, Cocina
+// INC-02: Facturación
 
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { useAuth, AuthProvider } from "./context/AuthContext";
 import ProtectedRoute from "./components/layout/ProtectedRoute";
 import Sidebar from "./components/layout/Sidebar";
-import LoginPage   from "./pages/auth/LoginPage";
-import MenuPage    from "./pages/menu/MenuPage";
-import PizzaForm   from "./pages/menu/PizzaForm";
-import PedidosPage  from "./pages/pedidos/PedidosPage";
-import NuevoPedido  from "./pages/pedidos/NuevoPedido";
-import EditarPedido from "./pages/pedidos/EditarPedido";
-import DetallePedido from "./pages/pedidos/DetallePedido";
-import VistaCocina  from "./pages/cocina/VistaCocina";
+import LoginPage        from "./pages/auth/LoginPage";
+import MenuPage         from "./pages/menu/MenuPage";
+import PizzaForm        from "./pages/menu/PizzaForm";
+import PedidosPage      from "./pages/pedidos/PedidosPage";
+import NuevoPedido      from "./pages/pedidos/NuevoPedido";
+import EditarPedido     from "./pages/pedidos/EditarPedido";
+import DetallePedido    from "./pages/pedidos/DetallePedido";
+import VistaCocina      from "./pages/cocina/VistaCocina";
+import FacturacionPage  from "./pages/facturacion/Facturacionpage";
+import ConfirmarFactura from "./pages/facturacion/Confirmarfactura ";
+import HistorialFacturas from "./pages/facturacion/HistorialFacturas";
+import VistaFactura     from "./pages/facturacion/Vistafactura";
 
 import "./styles/global.css";
 
 // Ruta de inicio según el rol del usuario
 const rutaInicial = (rol) => {
   if (rol === "Cocina") return "/cocina";
-  if (rol === "Dueño")    return "/menu";
+  if (rol === "Dueño")  return "/menu";
   return "/pedidos";
 };
 
@@ -46,7 +51,7 @@ const AppRoutes = () => {
         }
       />
 
-      {/* Menú */}
+      {/* ── Menú ── */}
       <Route
         path="/menu"
         element={
@@ -72,7 +77,7 @@ const AppRoutes = () => {
         }
       />
 
-      {/*Pedidos*/}
+      {/* ── Pedidos ── */}
       <Route
         path="/pedidos"
         element={
@@ -106,12 +111,46 @@ const AppRoutes = () => {
         }
       />
 
-      {/*Cocina*/}
+      {/* ── Cocina ── */}
       <Route
         path="/cocina"
         element={
           <ProtectedRoute roles={["Cocina"]}>
             <AppLayout><VistaCocina /></AppLayout>
+          </ProtectedRoute>
+        }
+      />
+
+      {/* ── Facturación ── */}
+      <Route
+        path="/facturacion"
+        element={
+          <ProtectedRoute roles={["Mostrador"]}>
+            <AppLayout><FacturacionPage /></AppLayout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/facturacion/:id"
+        element={
+          <ProtectedRoute roles={["Mostrador"]}>
+            <AppLayout><ConfirmarFactura /></AppLayout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/facturas"
+        element={
+          <ProtectedRoute roles={["Mostrador"]}>
+            <AppLayout><HistorialFacturas /></AppLayout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/facturas/:id"
+        element={
+          <ProtectedRoute roles={["Mostrador"]}>
+            <AppLayout><VistaFactura /></AppLayout>
           </ProtectedRoute>
         }
       />

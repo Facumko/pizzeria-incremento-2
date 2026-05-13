@@ -1,12 +1,11 @@
 // VistaFactura.jsx — CU-12
 // Muestra la factura generada con toda la info y permite imprimir.
-// Carga print.css para estilos de impresión.
 
 import { useState, useEffect } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams, useLocation } from "react-router-dom";
 import { getFacturaById } from "../../services/facturaService";
 import "./Facturacion.css";
-import "../../styles/print.css";
+import "../../styles/Print.css";
 
 const formatFecha = (isoString) => {
   if (!isoString) return "—";
@@ -24,11 +23,22 @@ const formatFecha = (isoString) => {
 };
 
 const VistaFactura = () => {
-  const { id } = useParams();
-  const navigate = useNavigate();
+  const { id }      = useParams();
+  const navigate    = useNavigate();
+  const location    = useLocation();
 
-  const [factura, setFactura] = useState(null);
-  const [error,   setError]   = useState("");
+  const [factura,  setFactura]  = useState(null);
+  const [error,    setError]    = useState("");
+  const [feedback, setFeedback] = useState(
+    location.state?.nuevo ? "Factura generada correctamente." : ""
+  );
+
+  useEffect(() => {
+    if (feedback) {
+      const t = setTimeout(() => setFeedback(""), 3500);
+      return () => clearTimeout(t);
+    }
+  }, [feedback]);
 
   useEffect(() => {
     getFacturaById(id)
@@ -65,6 +75,15 @@ const VistaFactura = () => {
           </button>
         </div>
       </div>
+
+      {feedback && (
+        <div
+          className="alert-error"
+          style={{ background: "#eafaf1", borderColor: "#82e0aa", color: "#1e8449", marginBottom: "var(--space-md)" }}
+        >
+          {feedback}
+        </div>
+      )}
 
       {/* Cuerpo de la factura — esto es lo que se imprime */}
       <div className="vista-factura card">
