@@ -1,6 +1,6 @@
 const ROL_MAP = {
   MANAGER: "Mostrador",
-  COOKEER:    "Cocina",
+  COOKER:    "Cocina",
   OWNER:   "Dueño",
 };
 

@@ -1,14 +1,13 @@
-// MenuPage.jsx
-// Acceso: Mostrador (solo consulta) | Dueño (CRUD completo)
+// MenuPage.jsx — CU-01, CU-02, CU-03, CU-04
+// Agrupa la lista plana del backend por nombre de variedad.
 
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { getPizzas, eliminarPizza } from "../../services/pizzaService";
+import { getPizzas, agruparPorVariedad } from "../../services/pizzaService";
 import { useAuth } from "../../context/AuthContext";
 import PizzaCard from "./PizzaCard";
 import "./Menu.css";
 
-const TIPOS_FILTRO = ["Todos", "piedra", "parrilla", "molde"];
 const MAX_BUSQUEDA = 100;
 
 const MenuPage = () => {
@@ -16,17 +15,20 @@ const MenuPage = () => {
   const { tieneRol } = useAuth();
   const esDueño = tieneRol("Dueño");
 
-  const [pizzas,     setPizzas]     = useState([]);
+  const [pizzasRaw,  setPizzasRaw]  = useState([]); // lista plana del backend
+  const [variedades, setVariedades] = useState([]); // agrupadas por nombre
   const [loading,    setLoading]    = useState(true);
   const [busqueda,   setBusqueda]   = useState("");
-  const [filtroTipo, setFiltroTipo] = useState("Todos");
   const [feedback,   setFeedback]   = useState("");
 
   const cargar = async () => {
     setLoading(true);
     try {
-      const data = await getPizzas();
-      setPizzas(data);
+      const lista = await getPizzas();
+      setPizzasRaw(lista);
+      setVariedades(agruparPorVariedad(lista));
+    } catch (e) {
+      setFeedback(`Error al cargar: ${e.message}`);
     } finally {
       setLoading(false);
     }
@@ -34,41 +36,24 @@ const MenuPage = () => {
 
   useEffect(() => { cargar(); }, []);
 
-  const handleEliminar = async (id) => {
-    try {
-      await eliminarPizza(id);
-      mostrarFeedback("Variedad eliminada correctamente.");
-      cargar();
-    } catch (e) {
-      mostrarFeedback(`Error: ${e.message}`, true);
-    }
-  };
-
-  const mostrarFeedback = (msg) => {
-    setFeedback(msg);
+  const handleEliminada = (nombre) => {
+    setFeedback(`"${nombre}" eliminada correctamente.`);
     setTimeout(() => setFeedback(""), 3500);
+    cargar();
   };
 
-  // Filtrado local — CU-04
-  const pizzasFiltradas = pizzas.filter((p) => {
-    const matchBusqueda =
-      !busqueda ||
-      p.nombre.toLowerCase().includes(busqueda.toLowerCase()) ||
-      p.ingredientes.toLowerCase().includes(busqueda.toLowerCase());
-    const matchTipo =
-      filtroTipo === "Todos" || p.tipos.includes(filtroTipo);
-    return matchBusqueda && matchTipo;
-  });
+  const variedadesFiltradas = variedades.filter((v) =>
+    !busqueda ||
+    v.nombre.toLowerCase().includes(busqueda.toLowerCase()) ||
+    v.descripcion?.toLowerCase().includes(busqueda.toLowerCase())
+  );
 
   return (
     <div className="page-container">
       <div className="page-header">
         <h1 className="page-title">Menú</h1>
         {esDueño && (
-          <button
-            className="btn btn--primary"
-            onClick={() => navigate("/menu/nueva")}
-          >
+          <button className="btn btn--primary" onClick={() => navigate("/menu/nueva")}>
             + Nueva variedad
           </button>
         )}
@@ -80,46 +65,34 @@ const MenuPage = () => {
         </div>
       )}
 
-      {/* Barra de filtros — CU-04 */}
       <div className="menu-toolbar">
         <input
           className="menu-toolbar__search"
           type="text"
-          placeholder="Buscar por nombre o ingrediente..."
+          placeholder="Buscar por nombre o descripción..."
           value={busqueda}
           onChange={(e) => setBusqueda(e.target.value)}
           maxLength={MAX_BUSQUEDA}
         />
-        <div className="filtros-bar" style={{ marginBottom: 0 }}>
-          {TIPOS_FILTRO.map((t) => (
-            <button
-              key={t}
-              className={`filtro-btn ${filtroTipo === t ? "filtro-btn--active" : ""}`}
-              onClick={() => setFiltroTipo(t)}
-            >
-              {t === "Todos" ? "Todos" : t}
-            </button>
-          ))}
-        </div>
       </div>
 
       {loading ? (
         <p className="empty-message">Cargando...</p>
-      ) : pizzasFiltradas.length === 0 ? (
+      ) : variedadesFiltradas.length === 0 ? (
         <p className="empty-message">
-          {pizzas.length === 0
+          {variedades.length === 0
             ? "No hay variedades registradas en el menú."
-            : "No hay variedades que coincidan con los filtros."}
+            : "No hay variedades que coincidan con la búsqueda."}
         </p>
       ) : (
         <div className="menu-grid">
-          {pizzasFiltradas.map((pizza) => (
+          {variedadesFiltradas.map((v) => (
             <PizzaCard
-              key={pizza.id}
-              pizza={pizza}
+              key={v.nombre}
+              variedad={v}
+              todasLasPizzas={pizzasRaw}
               puedeGestionar={esDueño}
-              onEditar={(p) => navigate(`/menu/editar/${p.id}`)}
-              onEliminar={handleEliminar}
+              onEliminada={handleEliminada}
             />
           ))}
         </div>

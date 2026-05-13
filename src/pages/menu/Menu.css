@@ -1,4 +1,4 @@
-/* Menu.css — INC-01 */
+/* Menu.css — INC-01 — estética actualizada */
 @import "../../styles/variables.css";
 @import "../../components/ui/Modal.css";
 
@@ -13,8 +13,7 @@
 
 .menu-toolbar__search {
   flex: 1;
-  min-width: 160px;
-  max-width: 100%;
+  min-width: 180px;
   padding: 9px 14px;
   border: 1.5px solid var(--color-border);
   border-radius: var(--radius-md);
@@ -30,15 +29,11 @@
   box-shadow: 0 0 0 3px rgba(26, 92, 56, 0.10);
 }
 
-/* ── Grid de pizzas — adaptable ── */
+/* ── Grid de pizzas ── */
 .menu-grid {
   display: grid;
-  /* mínimo 260px, máximo 1fr: en pantallas chicas cae a 1 col, en grandes llena */
-  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
   gap: var(--space-lg);
-  /* La grid no desborda el contenedor */
-  width: 100%;
-  min-width: 0;
 }
 
 /* ── PizzaCard ── */
@@ -46,9 +41,6 @@
   display: flex;
   flex-direction: column;
   gap: var(--space-sm);
-  /* Evita que el contenido interno rompa el ancho de la columna */
-  min-width: 0;
-  overflow: hidden;
   transition: box-shadow var(--transition), border-color var(--transition), transform var(--transition);
   border-left: 4px solid transparent;
 }
@@ -63,7 +55,6 @@
   align-items: flex-start;
   justify-content: space-between;
   gap: var(--space-sm);
-  min-width: 0;
 }
 
 .pizza-card__nombre {
@@ -71,10 +62,6 @@
   font-weight: 800;
   color: var(--color-text);
   letter-spacing: -0.3px;
-  /* Wrap si el nombre es largo */
-  word-break: break-word;
-  overflow-wrap: break-word;
-  min-width: 0;
 }
 
 .pizza-card__acciones {
@@ -87,8 +74,6 @@
   font-size: var(--font-size-sm);
   color: var(--color-text-secondary);
   line-height: 1.55;
-  word-break: break-word;
-  overflow-wrap: break-word;
 }
 
 .pizza-card__tipos {
@@ -106,7 +91,6 @@
   color: var(--color-text-secondary);
   text-transform: capitalize;
   font-weight: 600;
-  white-space: nowrap;
 }
 
 .pizza-card__precios {
@@ -123,29 +107,22 @@
   justify-content: space-between;
   align-items: center;
   font-size: var(--font-size-sm);
-  gap: var(--space-sm);
-  min-width: 0;
 }
 
 .pizza-card__precio-label {
   color: var(--color-text-muted);
   font-weight: 500;
-  white-space: nowrap;
 }
 
 .pizza-card__precio-valor {
   font-weight: 800;
   color: var(--color-primary);
   font-size: var(--font-size-base);
-  white-space: nowrap;
 }
 
 /* ── Formulario de pizza ── */
 .pizza-form {
   max-width: 640px;
-  /* En pantallas chicas ocupa el ancho disponible */
-  width: 100%;
-  min-width: 0;
 }
 
 .pizza-form__section {
@@ -169,7 +146,6 @@
   flex-direction: column;
   gap: 6px;
   margin-bottom: var(--space-md);
-  min-width: 0;
 }
 
 .pizza-form__label {
@@ -190,7 +166,6 @@
   transition: border-color var(--transition), box-shadow var(--transition);
   width: 100%;
   font-family: var(--font-main);
-  min-width: 0;
 }
 .pizza-form__input:focus {
   outline: none;
@@ -232,8 +207,6 @@
   display: flex;
   align-items: center;
   gap: var(--space-md);
-  flex-wrap: wrap;
-  min-width: 0;
 }
 
 .pizza-form__precio-label {
@@ -241,7 +214,6 @@
   color: var(--color-text-secondary);
   min-width: 100px;
   font-weight: 600;
-  white-space: nowrap;
 }
 
 .pizza-form__precio-input {
@@ -250,8 +222,6 @@
   border-radius: var(--radius-md);
   font-size: var(--font-size-sm);
   width: 140px;
-  /* En pantallas chicas no desborda */
-  max-width: 100%;
   transition: border-color var(--transition), box-shadow var(--transition);
   font-family: var(--font-main);
 }
@@ -269,26 +239,126 @@
   flex-wrap: wrap;
 }
 
-/* ── Responsive: pantallas angostas ── */
-@media (max-width: 480px) {
-  .menu-grid {
-    grid-template-columns: 1fr;
-  }
+/* ── Grilla de precios en PizzaForm ── */
+.pizza-form__grilla-wrapper {
+  overflow-x: auto;
+}
 
-  .pizza-form__precio-row {
-    flex-direction: column;
-    align-items: flex-start;
-  }
+.pizza-form__grilla {
+  border-collapse: collapse;
+  width: 100%;
+  min-width: 380px;
+}
 
-  .pizza-form__precio-input {
-    width: 100%;
-  }
+.pizza-form__grilla thead th {
+  padding: 8px 12px;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--color-text-secondary);
+  text-align: center;
+  background: var(--color-bg);
+  border-bottom: 2px solid var(--color-border);
+}
 
-  .pizza-form__actions {
-    justify-content: stretch;
-  }
-  .pizza-form__actions .btn {
-    width: 100%;
-    justify-content: center;
-  }
+.pizza-form__grilla thead th:first-child {
+  text-align: left;
+  width: 130px;
+}
+
+.pizza-form__grilla tbody tr:not(:last-child) td {
+  border-bottom: 1px solid var(--color-border);
+}
+
+.pizza-form__grilla-label {
+  padding: 12px 12px 12px 0;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  white-space: nowrap;
+}
+
+.pizza-form__grilla td {
+  padding: 8px 6px;
+  text-align: center;
+}
+
+.pizza-form__grilla-cell {
+  display: flex;
+  align-items: center;
+  border: 1.5px solid var(--color-border);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  background: var(--color-surface);
+  transition: border-color var(--transition), box-shadow var(--transition);
+}
+
+.pizza-form__grilla-cell:focus-within {
+  border-color: var(--color-green);
+  box-shadow: 0 0 0 3px rgba(26, 92, 56, 0.10);
+}
+
+.pizza-form__grilla-prefix {
+  padding: 0 6px 0 10px;
+  font-size: 13px;
+  color: var(--color-text-muted);
+  font-weight: 600;
+  user-select: none;
+}
+
+.pizza-form__grilla-input {
+  border: none;
+  outline: none;
+  padding: 8px 8px 8px 0;
+  width: 72px;
+  font-size: 13px;
+  font-family: var(--font-main);
+  color: var(--color-text);
+  background: transparent;
+}
+
+/* ── Tabla de precios en PizzaCard ── */
+.pizza-card__precios-tabla-wrapper {
+  margin-top: var(--space-sm);
+  overflow-x: auto;
+}
+
+.pizza-card__precios-tabla {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+}
+
+.pizza-card__precios-tabla thead th {
+  padding: 5px 8px;
+  font-weight: 700;
+  color: var(--color-text-muted);
+  text-align: center;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  border-bottom: 1.5px solid var(--color-border);
+}
+
+.pizza-card__precios-tabla thead th:first-child { text-align: left; }
+
+.pizza-card__precios-tabla tbody tr:not(:last-child) td {
+  border-bottom: 1px solid var(--color-border);
+}
+
+.pizza-card__precios-tipo {
+  padding: 6px 8px 6px 0;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  white-space: nowrap;
+  font-size: 12px;
+}
+
+.pizza-card__precios-valor {
+  padding: 6px 4px;
+  text-align: center;
+  font-weight: 700;
+  color: var(--color-primary);
+  white-space: nowrap;
 }
