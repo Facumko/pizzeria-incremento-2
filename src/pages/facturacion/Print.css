@@ -1,0 +1,82 @@
+/* print.css — Estilos de impresión para VistaFactura */
+
+@media print {
+  /* Ocultar todo excepto la factura */
+  body * {
+    visibility: hidden;
+  }
+
+  .vista-factura,
+  .vista-factura * {
+    visibility: visible;
+  }
+
+  .vista-factura {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    padding: 32px;
+    background: #fff;
+  }
+
+  /* Ocultar acciones, sidebar y header al imprimir */
+  .factura-acciones,
+  .sidebar,
+  .app-main > .page-header,
+  .btn {
+    display: none !important;
+  }
+
+  /* Ajustes de tipografía para impresión */
+  body {
+    font-family: 'Georgia', serif;
+    font-size: 12pt;
+    color: #000;
+  }
+
+  .factura-nro-grande {
+    color: #000;
+  }
+
+  .factura-total-row {
+    color: #000;
+  }
+
+  /* Tabla sin colores de fondo */
+  .factura-tabla thead th {
+    background: #f0f0f0;
+    color: #000;
+    border-bottom: 2pt solid #000;
+  }
+
+  .factura-tabla tbody td {
+    border-bottom: 0.5pt solid #ccc;
+  }
+
+  .factura-tabla tfoot td {
+    border-top: 2pt solid #000;
+  }
+
+  .factura-cliente-box {
+    background: #f9f9f9;
+    border: 1pt solid #ccc;
+  }
+
+  /* Evitar cortes de página dentro de la tabla */
+  .factura-tabla tr {
+    page-break-inside: avoid;
+  }
+
+  /* Pie de página de impresión */
+  .vista-factura::after {
+    content: "Gracias por su preferencia — Pizzería";
+    display: block;
+    text-align: center;
+    margin-top: 40px;
+    font-size: 10pt;
+    color: #666;
+    border-top: 0.5pt solid #ccc;
+    padding-top: 12px;
+  }
+}

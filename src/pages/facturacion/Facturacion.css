@@ -1,0 +1,299 @@
+/* Facturacion.css — INC-02 */
+@import "../../styles/variables.css";
+@import "../../components/ui/Modal.css";
+@import "../../components/ui/Badge.css";
+
+/* ── Factura card ── */
+.factura-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-md);
+  cursor: pointer;
+  transition: all var(--transition);
+  border-left: 4px solid transparent;
+}
+
+.factura-card:hover {
+  box-shadow: var(--shadow-md);
+  border-left-color: var(--color-primary);
+  transform: translateX(2px);
+}
+
+.factura-card__left {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  flex: 1;
+  min-width: 0;
+}
+
+.factura-nro {
+  font-size: 22px;
+  font-weight: 800;
+  color: var(--color-border-strong);
+  min-width: 60px;
+  letter-spacing: -1px;
+}
+
+.factura-cliente {
+  font-weight: 700;
+  color: var(--color-text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 260px;
+}
+
+.factura-meta {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+  margin-top: 2px;
+}
+
+.factura-total {
+  font-weight: 800;
+  font-size: var(--font-size-lg);
+  color: var(--color-primary);
+  flex-shrink: 0;
+}
+
+/* ── FacturacionPage — lista de pedidos listos ── */
+.pedidos-listos-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.pedido-listo-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-md);
+  cursor: default;
+  border-left: 4px solid var(--color-listo-border);
+}
+
+.pedido-listo-card__left {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  flex: 1;
+  min-width: 0;
+}
+
+/* ── VistaFactura ── */
+.vista-factura {
+  max-width: 780px;
+}
+
+.factura-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: var(--space-xl);
+  padding-bottom: var(--space-lg);
+  border-bottom: 2px solid var(--color-border);
+  gap: var(--space-md);
+  flex-wrap: wrap;
+}
+
+.factura-header__marca {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+}
+
+.factura-header__logo {
+  width: 56px;
+  height: 56px;
+  object-fit: contain;
+}
+
+.factura-header__nombre {
+  font-size: 24px;
+  font-weight: 800;
+  color: var(--color-text);
+  letter-spacing: -0.5px;
+}
+
+.factura-header__subtitulo {
+  font-size: 12px;
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.factura-header__datos {
+  text-align: right;
+}
+
+.factura-nro-grande {
+  font-size: 28px;
+  font-weight: 800;
+  color: var(--color-primary);
+  letter-spacing: -1px;
+}
+
+.factura-fecha {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  margin-top: 4px;
+}
+
+.factura-cliente-box {
+  background: var(--color-surface-alt);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: var(--space-md) var(--space-lg);
+  margin-bottom: var(--space-lg);
+  display: flex;
+  gap: var(--space-xl);
+  flex-wrap: wrap;
+}
+
+.factura-cliente-box__item {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.factura-cliente-box__label {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--color-text-muted);
+}
+
+.factura-cliente-box__valor {
+  font-size: var(--font-size-base);
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+/* ── Tabla de items ── */
+.factura-tabla-wrapper {
+  width: 100%;
+  overflow-x: auto;
+  margin-bottom: var(--space-lg);
+}
+
+.factura-tabla {
+  width: 100%;
+  min-width: 520px;
+  border-collapse: collapse;
+}
+
+.factura-tabla thead th {
+  text-align: left;
+  padding: 10px var(--space-md);
+  background: var(--color-bg);
+  border-bottom: 2px solid var(--color-border);
+  font-weight: 700;
+  color: var(--color-text-secondary);
+  text-transform: uppercase;
+  font-size: 11px;
+  letter-spacing: 0.4px;
+}
+
+.factura-tabla thead th:last-child,
+.factura-tabla thead th:nth-last-child(2) {
+  text-align: right;
+}
+
+.factura-tabla tbody td {
+  padding: 10px var(--space-md);
+  border-bottom: 1px solid var(--color-border);
+  font-size: var(--font-size-base);
+}
+
+.factura-tabla tbody td:last-child,
+.factura-tabla tbody td:nth-last-child(1) {
+  text-align: right;
+  font-weight: 700;
+  color: var(--color-text);
+}
+
+.factura-tabla tfoot td {
+  padding: 12px var(--space-md);
+  border-top: 2px solid var(--color-border);
+}
+
+.factura-total-row {
+  font-size: var(--font-size-xl);
+  font-weight: 800;
+  color: var(--color-primary);
+  text-align: right;
+}
+
+/* ── Acciones de la factura ── */
+.factura-acciones {
+  display: flex;
+  gap: var(--space-sm);
+  justify-content: flex-end;
+  margin-top: var(--space-lg);
+  padding-top: var(--space-lg);
+  border-top: 1px solid var(--color-border);
+  flex-wrap: wrap;
+}
+
+/* ── Historial ── */
+.historial-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* ── Confirmar factura ── */
+.confirmar-factura__resumen {
+  background: var(--color-surface-alt);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: var(--space-lg);
+  margin-bottom: var(--space-lg);
+}
+
+.confirmar-factura__titulo {
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--color-text-muted);
+  margin-bottom: var(--space-md);
+}
+
+.confirmar-factura__lineas {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+.confirmar-factura__linea {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  padding: var(--space-xs) 0;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.confirmar-factura__linea:last-child {
+  border-bottom: none;
+}
+
+.confirmar-factura__total {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: var(--space-md);
+  padding-top: var(--space-md);
+  border-top: 2px solid var(--color-border);
+  font-size: var(--font-size-lg);
+  font-weight: 800;
+}
+
+.confirmar-factura__total-valor {
+  color: var(--color-primary);
+}
