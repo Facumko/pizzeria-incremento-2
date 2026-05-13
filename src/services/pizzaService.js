@@ -1,129 +1,127 @@
-const COOKING_TYPE_REVERSE = {
-  PIEDRA:   "piedra",
-  PARRILLA: "parrilla",
-  MOLDE:    "molde",
-};
+// pizzaService.js — Fase 2 (backend Java)
+//
+// El backend maneja pizzas como entidades individuales:
+// { id, nombre, tipoCoccion, tamanio, descripcion, precio }
+//
+// El front agrupa por nombre para mostrarlas como una sola variedad.
+//
+// Endpoints:
+//   GET    /api/pizzas        → lista plana de todas las combinaciones
+//   GET    /api/pizzas/:id    → una combinación
+//   POST   /api/pizzas        → crear una combinación
+//   PUT    /api/pizzas/:id    → modificar una combinación
+//   DELETE /api/pizzas/:id    → eliminar una combinación
 
-const SIZE_REVERSE = {
-  SMALL:  8,
-  MEDIUM: 10,
-  LARGE:  12,
-};
+const BASE = "/api/pizzas";
 
-const COOKING_TYPE_MAP = {
-  piedra:   "PIEDRA",
-  parrilla: "PARRILLA",
-  molde:    "MOLDE",
-};
-
-const SIZE_MAP = {
-  8:  "SMALL",
-  10: "MEDIUM",
-  12: "LARGE",
-};
-
-// Agrupa las variantes del backend en cards de frontend
-const agruparPizzas = (lista) => {
-  const mapa = {};
-  for (const p of lista) {
-    const tipo    = COOKING_TYPE_REVERSE[p.cookingType] ?? p.cookingType.toLowerCase();
-    const tamanio = SIZE_REVERSE[p.size] ?? p.size;
-
-    if (!mapa[p.name]) {
-      mapa[p.name] = {
-        nombre:      p.name,
-        ingredientes: p.description,
-        tipos:       [],
-        precios:     {},
-        variantes:   [],
-      };
-    }
-
-    const pizza = mapa[p.name];
-
-    if (!pizza.tipos.includes(tipo)) pizza.tipos.push(tipo);
-
-    if (!pizza.precios[tipo]) pizza.precios[tipo] = {};
-    pizza.precios[tipo][tamanio] = p.price;
-
-    pizza.variantes.push({ id: p.id, tipo, tamanio, precio: p.price });
+const handleResponse = async (res) => {
+  if (res.ok) {
+    if (res.status === 204) return true;
+    return res.json();
   }
-  return Object.values(mapa);
+  let msg = `Error ${res.status}`;
+  try {
+    const data = await res.json();
+    msg = data.message || data.error || msg;
+  } catch {}
+  throw new Error(msg);
 };
 
-// GET /pizza/traer
+// GET /api/pizzas — devuelve lista plana
 export const getPizzas = async () => {
-  const res = await fetch("/pizza/traer", { credentials: "include" });
-  if (!res.ok) throw new Error("Error al cargar el menú");
-  const data = await res.json();
-  return agruparPizzas(data);
+  const res = await fetch(BASE, { credentials: "include" });
+  return handleResponse(res);
 };
 
 // GET pizza por id agrupado (busca en la lista completa)
 export const getPizzaById = async (id) => {
-  const pizzas = await getPizzas();
-  // id acá es el nombre usado como key en edición
-  const pizza = pizzas.find((p) => String(p.id) === String(id) || p.nombre === id);
-  if (!pizza) throw new Error("Pizza no encontrada");
-  return pizza;
+  const res = await fetch(`${BASE}/${id}`, { credentials: "include" });
+  return handleResponse(res);
 };
 
-// POST /pizza/guardar — crea UNA variante
+// POST /api/pizzas — una combinación por vez
+// payload: { nombre, tipoCoccion, tamanio, descripcion, precio }
 export const crearPizza = async (data) => {
-  // data.tipos y data.precios vienen del form agrupado
-  // por cada tipo × tamaño creamos una variante
-  const variantes = [];
-  for (const tipo of data.tipos) {
-    for (const [tam, precio] of Object.entries(data.precios[tipo] ?? {})) {
-      const body = {
-        name:        data.nombre,
-        description: data.ingredientes,
-        cookingType: COOKING_TYPE_MAP[tipo],
-        size:        SIZE_MAP[Number(tam)],
-        price:       precio,
-      };
-      const res = await fetch("/pizza/guardar", {
-        method:      "POST",
-        headers:     { "Content-Type": "application/json" },
-        credentials: "include",
-        body:        JSON.stringify(body),
+  const res = await fetch(BASE, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    credentials: "include",
+    body: JSON.stringify(data),
+  });
+  return handleResponse(res);
+};
+
+// Crea las 9 combinaciones de una variedad de una vez
+// Devuelve array de resultados o lanza error si alguno falla
+export const crearVariedad = async ({ nombre, descripcion, precios }) => {
+  // precios: { PIEDRA: { 8: x, 10: x, 12: x }, PARRILLA: {...}, MOLDE: {...} }
+  const TIPOS    = ["PIEDRA", "PARRILLA", "MOLDE"];
+  const TAMANIOS = [8, 10, 12];
+
+  const combinaciones = [];
+  for (const tipo of TIPOS) {
+    for (const tam of TAMANIOS) {
+      combinaciones.push({
+        nombre,
+        descripcion,
+        tipoCoccion: tipo,
+        tamanio: tam,
+        precio: Number(precios[tipo][tam]),
       });
-      if (!res.ok) {
-        const err = await res.json().catch(() => ({}));
-        const msg = Object.values(err.errors ?? {}).join(", ") || "Error al crear pizza";
-        throw new Error(msg);
-      }
-      variantes.push(await res.json());
     }
   }
-  return variantes;
+
+  const resultados = await Promise.all(combinaciones.map(crearPizza));
+  return resultados;
 };
 
-// PUT /pizza/editar/{id} — edita una variante por id
+// PUT /api/pizzas/:id
 export const modificarPizza = async (id, data) => {
-  const body = {
-    name:        data.nombre,
-    description: data.ingredientes,
-    cookingType: COOKING_TYPE_MAP[data.tipo],
-    size:        SIZE_MAP[Number(data.tamanio)],
-    price:       data.precio,
-  };
-  const res = await fetch(`/pizza/editar/${id}`, {
-    method:      "PUT",
-    headers:     { "Content-Type": "application/json" },
+  const res = await fetch(`${BASE}/${id}`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
     credentials: "include",
-    body:        JSON.stringify(body),
+    body: JSON.stringify(data),
   });
-  if (!res.ok) throw new Error("Error al modificar pizza");
-  return res.json();
+  return handleResponse(res);
 };
 
-// DELETE /pizza/eliminar/{id}
+// DELETE /api/pizzas/:id
 export const eliminarPizza = async (id) => {
-  const res = await fetch(`/pizza/eliminar/${id}`, {
-    method:      "DELETE",
+  const res = await fetch(`${BASE}/${id}`, {
+    method: "DELETE",
     credentials: "include",
   });
-  if (!res.ok) throw new Error("Error al eliminar pizza");
-  return true;
+  return handleResponse(res);
+};
+
+// Elimina todas las combinaciones de una variedad (por nombre)
+export const eliminarVariedad = async (nombre, todasLasPizzas) => {
+  const ids = todasLasPizzas
+    .filter((p) => p.nombre === nombre)
+    .map((p) => p.id);
+  await Promise.all(ids.map(eliminarPizza));
+};
+
+// Helper: agrupa lista plana por nombre
+// Devuelve array de { nombre, descripcion, tipos, precios }
+// donde precios[tipo][tamanio] = precio
+export const agruparPorVariedad = (pizzas) => {
+  const mapa = {};
+  for (const p of pizzas) {
+    if (!mapa[p.nombre]) {
+      mapa[p.nombre] = {
+        nombre: p.nombre,
+        descripcion: p.descripcion,
+        precios: {},     // { PIEDRA: { 8: x, ... }, ... }
+        ids: {},         // { PIEDRA: { 8: id, ... }, ... }  ← para editar/eliminar
+      };
+    }
+    const v = mapa[p.nombre];
+    if (!v.precios[p.tipoCoccion]) v.precios[p.tipoCoccion] = {};
+    if (!v.ids[p.tipoCoccion])     v.ids[p.tipoCoccion]     = {};
+    v.precios[p.tipoCoccion][p.tamanio] = p.precio;
+    v.ids[p.tipoCoccion][p.tamanio]     = p.id;
+  }
+  return Object.values(mapa);
 };

@@ -1,7 +1,6 @@
 const ROL_MAP = {
   MANAGER: "Mostrador",
-  COOK:    "Cocina",
-  COOKER:  "Cocina",  // por si el backend manda COOKER
+  COOKER:    "Cocina",
   OWNER:   "Dueño",
 };
 
