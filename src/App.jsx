@@ -64,7 +64,7 @@ const AppRoutes = () => {
         }
       />
       <Route
-        path="/menu/editar/:id"
+        path="/menu/editar/:nombre"
         element={
           <ProtectedRoute roles={["Dueño"]}>
             <AppLayout><PizzaForm /></AppLayout>
